@@ -810,7 +810,7 @@ async function loadData() {
     }
 
     if (selUsers.length === 0) {
-      if (selCats.length > 0) {
+      if (selCats.length > 0 && currentAnalysisTab === 'classic') {
         results = results.filter(r => r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
       } else {
         results = results.filter(r => r.leads > 0 || r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
