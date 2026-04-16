@@ -232,6 +232,10 @@
     }
     .funnel-stage {
       width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
     }
     .funnel-bar {
       height: 54px; border-radius: 14px; display: flex;
@@ -239,14 +243,23 @@
       color: #fff; transition: transform 0.2s, filter 0.15s; cursor: default;
       margin: 0 auto; overflow: hidden; white-space: nowrap;
       max-width: 100%; box-sizing: border-box;
+      min-width: 54px;
     }
     .funnel-bar:hover { transform: scale(1.015); filter: brightness(1.06); }
-    .fb-0 { background: linear-gradient(135deg, #007aff, #5ac8fa); width: 100%; }
-    .fb-1 { background: linear-gradient(135deg, #af52de, #da8fff); width: 80%; }
-    .fb-2 { background: linear-gradient(135deg, #34c759, #6ee08a); width: 62%; }
-    .fb-3 { background: linear-gradient(135deg, #ff9500, #ffb340); width: 46%; }
+    .fb-0 { background: linear-gradient(135deg, #007aff, #5ac8fa); }
+    .fb-1 { background: linear-gradient(135deg, #af52de, #da8fff); }
+    .fb-2 { background: linear-gradient(135deg, #34c759, #6ee08a); }
+    .fb-3 { background: linear-gradient(135deg, #ff9500, #ffb340); }
     .funnel-bar .fv { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
     .funnel-bar .fl { font-size: 13px; font-weight: 500; opacity: 0.88; }
+    /* External label for narrow bars */
+    .funnel-label-ext {
+      display: none;
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .funnel-stage.narrow .funnel-bar .fl { display: none; }
+    .funnel-stage.narrow .funnel-label-ext { display: inline; }
     .funnel-gap {
       display: flex; align-items: center; justify-content: center;
       gap: 6px; padding: 6px 0; color: var(--text-muted);
@@ -948,17 +961,21 @@ function renderFunnel(totals) {
     { label: 'Успешные', value: totals.wonCount, idx: 2 }
   ];
 
-  let maxVal = Math.max(totals.leads, totals.deals, totals.wonCount);
-  if (maxVal === 0) maxVal = 1;
+  const maxVal = Math.max(totals.leads, 1);
 
   let html = '';
   steps.forEach((step, i) => {
     const val = step.value.toLocaleString('ru-RU');
-    // Расчет ширины относительно максимального значения (минимум 35% для отображения текста)
-    let w = Math.max(35, (step.value / maxVal) * 100);
+    // Proportional width: use log-scale blend for better visual when values differ wildly
+    // Linear percentage of max, with a small minimum of 8% so bar is always visible
+    const pct = (step.value / maxVal) * 100;
+    const w = Math.max(8, pct);
+    // If bar is narrower than 25%, text won't fit inside — show label outside
+    const isNarrow = w < 25;
     
-    html += `<div class="funnel-stage fade-in" style="animation-delay:${i * 0.06}s">
+    html += `<div class="funnel-stage fade-in ${isNarrow ? 'narrow' : ''}" style="animation-delay:${i * 0.06}s">
       <div class="funnel-bar fb-${step.idx}" style="width:${w}%"><span class="fv">${val}</span><span class="fl">${step.label}</span></div>
+      <span class="funnel-label-ext">${step.label}</span>
     </div>`;
     
     if (i < steps.length - 1) {
