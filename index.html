@@ -107,14 +107,9 @@
 
     /* ─── Filters ─── */
     .filters-row {
-      display: flex;
-      gap: 12px;
-      align-items: end;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
+      display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 12px;
     }
     .filters-row:last-child { margin-bottom: 0; }
-
     .filter-group { display: flex; flex-direction: column; gap: 5px; }
     .filter-group label {
       font-size: 11px; font-weight: 600; color: var(--text-muted);
@@ -150,7 +145,7 @@
       background: var(--text-primary); color: #fff; border-color: var(--text-primary);
     }
 
-    /* ─── Combo Box (Searchable Select) ─── */
+    /* ─── Combo Box ─── */
     .combo-box { position: relative; min-width: 150px; width: 100%; }
     .combo-input {
       width: 100%; height: 42px; padding: 0 28px 0 12px; text-overflow: ellipsis;
@@ -158,8 +153,7 @@
       background: var(--bg-input); color: var(--text-primary);
       border: 1px solid var(--border); border-radius: var(--radius-sm);
       outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-      cursor: pointer; text-overflow: ellipsis;
-      box-sizing: border-box;
+      cursor: pointer; box-sizing: border-box;
     }
     .combo-input:focus {
       border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
@@ -175,8 +169,7 @@
       display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
-      max-height: 240px; overflow-y: auto; z-index: 100;
-      padding: 4px;
+      max-height: 240px; overflow-y: auto; z-index: 100; padding: 4px;
     }
     .combo-box.open .combo-dropdown { display: block; }
     .combo-option {
@@ -186,53 +179,40 @@
     }
     .combo-option:hover, .combo-option.highlighted { background: rgba(0,113,227,0.08); }
     .combo-option.selected { font-weight: 600; color: var(--accent); }
-    .combo-empty {
-      padding: 12px; font-size: 12px; color: var(--text-muted); text-align: center;
-    }
+    .combo-empty { padding: 12px; font-size: 12px; color: var(--text-muted); text-align: center; }
 
-    /* ─── Spam Metric Card ─── */
-    .spam-metric {
+    /* ─── Metrics Bar ─── */
+    .metrics-bar {
       display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
     }
-    .spam-card {
+    .metric-card {
       display: flex; align-items: center; gap: 14px;
       background: var(--bg-card); border-radius: var(--radius);
       box-shadow: var(--shadow-sm); padding: 16px 24px;
-      flex: 1; min-width: 280px;
-      border-left: 4px solid var(--red);
+      flex: 1; min-width: 220px;
     }
-    .spam-card .sc-icon {
+    .metric-card .mc-icon {
       width: 40px; height: 40px; border-radius: 12px;
-      background: rgba(255,59,48,0.1); color: var(--red);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .spam-card .sc-icon svg { width: 20px; height: 20px; }
-    .spam-card .sc-body { display: flex; flex-direction: column; gap: 2px; }
-    .spam-card .sc-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
-    .spam-card .sc-value { font-size: 24px; font-weight: 800; color: var(--red); letter-spacing: -0.3px; }
-    .spam-card .sc-pct {
-      font-size: 12px; font-weight: 600; color: var(--text-muted);
-      margin-left: 6px;
-    }
-    .spam-card .sc-detail { font-size: 11px; color: var(--text-muted); }
+    .metric-card .mc-icon svg { width: 20px; height: 20px; }
+    .metric-card .mc-body { display: flex; flex-direction: column; gap: 2px; }
+    .metric-card .mc-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .metric-card .mc-value { font-size: 24px; font-weight: 800; letter-spacing: -0.3px; }
+    .metric-card .mc-pct { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-left: 6px; }
+    .metric-card .mc-detail { font-size: 11px; color: var(--text-muted); }
 
-    .median-card {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--bg-card); border-radius: var(--radius);
-      box-shadow: var(--shadow-sm); padding: 16px 24px;
-      flex: 1; min-width: 280px;
-      border-left: 4px solid var(--teal);
-    }
-    .median-card .mc-icon {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: rgba(90,200,250,0.1); color: var(--teal);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .median-card .mc-icon svg { width: 20px; height: 20px; }
-    .median-card .mc-body { display: flex; flex-direction: column; gap: 2px; }
-    .median-card .mc-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
-    .median-card .mc-value { font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
-    .median-card .mc-detail { font-size: 11px; color: var(--text-muted); }
+    .metric-card.spam { border-left: 4px solid var(--red); }
+    .metric-card.spam .mc-icon { background: rgba(255,59,48,0.1); color: var(--red); }
+    .metric-card.spam .mc-value { color: var(--red); }
+
+    .metric-card.pending { border-left: 4px solid var(--amber); }
+    .metric-card.pending .mc-icon { background: rgba(255,149,0,0.1); color: var(--amber); }
+    .metric-card.pending .mc-value { color: var(--amber); }
+
+    .metric-card.time { border-left: 4px solid var(--teal); }
+    .metric-card.time .mc-icon { background: rgba(90,200,250,0.1); color: var(--teal); }
+    .metric-card.time .mc-value { color: var(--text-primary); }
 
     /* ─── Funnel ─── */
     .funnel-section {
@@ -249,38 +229,29 @@
       display: flex; flex-direction: column; align-items: center;
     }
     .funnel-stage {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
     }
     .funnel-bar {
       height: 54px; border-radius: 14px; display: flex;
       align-items: center; justify-content: center; gap: 10px;
       color: #fff; transition: transform 0.2s, filter 0.15s; cursor: default;
       margin: 0 auto; overflow: hidden; white-space: nowrap;
-      max-width: 100%; box-sizing: border-box;
-      min-width: 54px;
+      max-width: 100%; box-sizing: border-box; min-width: 54px;
     }
     .funnel-bar:hover { transform: scale(1.015); filter: brightness(1.06); }
     .fb-0 { background: linear-gradient(135deg, #007aff, #5ac8fa); }
     .fb-1 { background: linear-gradient(135deg, #af52de, #da8fff); }
     .fb-2 { background: linear-gradient(135deg, #34c759, #6ee08a); }
-    .fb-3 { background: linear-gradient(135deg, #ff9500, #ffb340); }
     .funnel-bar .fv { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
     .funnel-bar .fl { font-size: 13px; font-weight: 500; opacity: 0.88; }
-    /* External label for narrow bars */
     .funnel-label-ext {
-      display: none;
-      font-size: 13px; font-weight: 600; color: var(--text-secondary);
-      white-space: nowrap;
+      display: none; font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
     }
     .funnel-stage.narrow .funnel-bar .fl { display: none; }
     .funnel-stage.narrow .funnel-label-ext { display: inline; }
     .funnel-gap {
       display: flex; align-items: center; justify-content: center;
-      gap: 6px; padding: 6px 0; color: var(--text-muted);
+      gap: 6px; padding: 6px 0; color: var(--text-muted); flex-wrap: wrap;
     }
     .funnel-gap svg { width: 14px; height: 14px; opacity: 0.35; }
     .fg-badge {
@@ -290,7 +261,10 @@
     .fg-spam {
       background: rgba(255,59,48,0.08); padding: 2px 10px; border-radius: 10px;
       font-size: 11px; font-weight: 600; color: var(--red);
-      margin-left: 8px;
+    }
+    .fg-pending {
+      background: rgba(255,149,0,0.08); padding: 2px 10px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; color: var(--amber);
     }
     .funnel-revenue {
       margin-top: 24px; padding-top: 24px;
@@ -323,7 +297,7 @@
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     thead th {
-      padding: 12px 16px; text-align: center;
+      padding: 12px 14px; text-align: center;
       font-size: 11px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.5px;
       background: var(--bg-secondary); border-bottom: 1px solid var(--border);
@@ -337,7 +311,7 @@
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(0,122,255,0.03); }
     tbody td {
-      padding: 14px 16px; white-space: nowrap;
+      padding: 14px; white-space: nowrap;
       text-align: center; font-variant-numeric: tabular-nums;
     }
     tbody td:nth-child(2) { text-align: left; }
@@ -345,21 +319,17 @@
     td.num { font-weight: 500; }
     td.highlight-blue { color: var(--blue); font-weight: 600; }
     td.highlight-red { color: var(--red); font-weight: 600; }
+    td.highlight-orange { color: var(--amber); font-weight: 600; }
     td.highlight-green { color: #248a3d; font-weight: 600; }
     td.highlight-amber { color: #c77800; font-weight: 700; }
     td.highlight-teal { color: #0891b2; font-weight: 600; }
-    td.rank {
-      width: 40px; font-weight: 700; font-size: 13px; color: var(--text-muted);
-    }
+    td.rank { width: 40px; font-weight: 700; font-size: 13px; color: var(--text-muted); }
     td.rank.top-1 { color: var(--amber); }
     td.rank.top-2 { color: #8e8e93; }
     td.rank.top-3 { color: #c77800; }
 
     /* ─── States ─── */
-    .state-message {
-      padding: 60px 20px; text-align: center;
-      color: var(--text-muted); font-size: 14px;
-    }
+    .state-message { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
     .spinner {
       width: 28px; height: 28px; border: 3px solid var(--border);
       border-top-color: var(--accent); border-radius: 50%;
@@ -367,8 +337,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .progress-text { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 6px; }
-
-    /* ─── Animations ─── */
     .fade-in { animation: fadeIn 0.35s ease-out both; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
@@ -382,19 +350,17 @@
       .combo-box { min-width: unset; width: 100%; }
       .settings-bar { flex-direction: column; align-items: stretch; }
       .settings-bar input[type="text"] { min-width: unset; }
-      .spam-metric { flex-direction: column; }
+      .metrics-bar { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- Header -->
     <div class="header">
       <h1>Сквозная аналитика</h1>
-      <p>Битрикс24 CRM — лиды, сделки, выручка в разрезе ответственных</p>
+      <p>Битрикс24 CRM — когортный анализ лидов в разрезе ответственных</p>
     </div>
 
-    <!-- Webhook Settings (скрыто для безопасности) -->
     <div class="card" style="display:none;">
       <div class="settings-bar">
         <label>Вебхук</label>
@@ -404,9 +370,7 @@
       </div>
     </div>
 
-    <!-- Filters -->
     <div class="card" id="filtersPanel" style="display:none;">
-      <!-- Row 1: Date picker + Quick presets -->
       <div class="filters-row">
         <div class="filter-group">
           <label>Период анализа</label>
@@ -423,7 +387,6 @@
           </div>
         </div>
       </div>
-      <!-- Row 2: Dropdowns + Load button -->
       <div class="filters-row">
         <div class="filter-group" style="flex:1;">
           <label>Воронка</label>
@@ -447,17 +410,25 @@
       </div>
     </div>
 
-    <!-- Spam + Median Metrics -->
-    <div class="spam-metric" id="metricsBar" style="display:none;">
-      <div class="spam-card fade-in">
-        <div class="sc-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"/></svg></div>
-        <div class="sc-body">
-          <span class="sc-label">Спам / Не наш профиль</span>
-          <div><span class="sc-value" id="spamValue">0</span><span class="sc-pct" id="spamPct"></span></div>
-          <span class="sc-detail" id="spamDetail"></span>
+    <!-- Metrics Bar: Spam + In-Progress + Median -->
+    <div class="metrics-bar" id="metricsBar" style="display:none;">
+      <div class="metric-card spam fade-in">
+        <div class="mc-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"/></svg></div>
+        <div class="mc-body">
+          <span class="mc-label">Спам / Не наш профиль</span>
+          <div><span class="mc-value" id="spamValue">0</span><span class="mc-pct" id="spamPct"></span></div>
+          <span class="mc-detail" id="spamDetail"></span>
         </div>
       </div>
-      <div class="median-card fade-in" style="animation-delay:.06s">
+      <div class="metric-card pending fade-in" style="animation-delay:.04s">
+        <div class="mc-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></div>
+        <div class="mc-body">
+          <span class="mc-label">В работе (на конец периода)</span>
+          <div><span class="mc-value" id="pendingValue">0</span><span class="mc-pct" id="pendingPct"></span></div>
+          <span class="mc-detail" id="pendingDetail"></span>
+        </div>
+      </div>
+      <div class="metric-card time fade-in" style="animation-delay:.08s">
         <div class="mc-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
         <div class="mc-body">
           <span class="mc-label">Медиана обработки лида</span>
@@ -483,13 +454,14 @@
         <table>
           <thead>
             <tr>
-              <th style="width:44px">#</th>
+              <th style="width:40px">#</th>
               <th data-sort="name">Ответственный</th>
               <th data-sort="leads">Лиды</th>
               <th data-sort="spamCount">Спам</th>
+              <th data-sort="inProgressCount">В работе</th>
               <th data-sort="deals">Сделки</th>
               <th data-sort="wonCount">Успешные</th>
-              <th data-sort="conversion">Конверсия</th>
+              <th data-sort="conversion">Конв.</th>
               <th data-sort="avgProcessingHours">Ср. время</th>
               <th data-sort="revenue" class="sorted">Выручка ▼</th>
             </tr>
@@ -531,21 +503,15 @@ const RETAIL_EMPLOYEES_MAP = {
 };
 
 const KZT_FUNNEL_NAMES = [
-  "КЗ опт развитие",
-  "КЗ возврат надлеж качество",
-  "КЗ возврат по гарантии",
-  "АЛМ розница",
-  "АСТ розница"
+  "КЗ опт развитие", "КЗ возврат надлеж качество", "КЗ возврат по гарантии",
+  "АЛМ розница", "АСТ розница"
 ];
 let rateCache = new Map();
 
 async function getKztToRubRate(dateStr) {
   if (!dateStr) return 0.2;
   const dateOnly = dateStr.split('T')[0];
-  
-  if (rateCache.has(dateOnly)) {
-    return await rateCache.get(dateOnly);
-  }
+  if (rateCache.has(dateOnly)) return await rateCache.get(dateOnly);
 
   const promise = (async () => {
     let currentD = new Date(dateOnly);
@@ -554,11 +520,7 @@ async function getKztToRubRate(dateStr) {
       const mm = String(currentD.getMonth() + 1).padStart(2, '0');
       const dd = String(currentD.getDate()).padStart(2, '0');
       const cacheKey = `${yyyy}-${mm}-${dd}`;
-      
-      if (rateCache.has(cacheKey) && typeof rateCache.get(cacheKey) === 'number') {
-        return rateCache.get(cacheKey);
-      }
-      
+      if (rateCache.has(cacheKey) && typeof rateCache.get(cacheKey) === 'number') return rateCache.get(cacheKey);
       try {
         const url = `https://www.cbr-xml-daily.ru/archive/${yyyy}/${mm}/${dd}/daily_json.js`;
         const resp = await fetch(url);
@@ -570,9 +532,7 @@ async function getKztToRubRate(dateStr) {
             return rate;
           }
         }
-      } catch (e) {
-        console.warn("CBR rate fetch fallback", cacheKey);
-      }
+      } catch (e) { console.warn("CBR rate fetch fallback", cacheKey); }
       currentD.setDate(currentD.getDate() - 1);
     }
     return 0.2;
@@ -605,19 +565,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function initDatepicker() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
   fpInstance = flatpickr("#dateRangePicker", {
-    mode: "range",
-    showMonths: window.innerWidth > 768 ? 2 : 1,
-    locale: "ru",
-    dateFormat: "Y-m-d",
-    altInput: true,
-    altFormat: "d.m.Y",
+    mode: "range", showMonths: window.innerWidth > 768 ? 2 : 1,
+    locale: "ru", dateFormat: "Y-m-d", altInput: true, altFormat: "d.m.Y",
     defaultDate: [monthStart, now],
-    onChange: function(selectedDates) {
-      if (selectedDates.length === 2) {
-        document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
-      }
+    onChange: function(sel) {
+      if (sel.length === 2) document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
     }
   });
 }
@@ -629,21 +582,12 @@ function setPeriod(type, el) {
   let from;
   switch (type) {
     case 'today': from = new Date(now); break;
-    case 'week':
-      from = new Date(now);
-      from.setDate(from.getDate() - ((from.getDay() + 6) % 7));
-      break;
+    case 'week': from = new Date(now); from.setDate(from.getDate() - ((from.getDay() + 6) % 7)); break;
     case 'month': from = new Date(now.getFullYear(), now.getMonth(), 1); break;
-    case 'quarter':
-      from = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
-      break;
+    case 'quarter': from = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1); break;
     case 'year': from = new Date(now.getFullYear(), 0, 1); break;
   }
-  
-  if (fpInstance) {
-    fpInstance.setDate([from, now]);
-  }
-  
+  if (fpInstance) fpInstance.setDate([from, now]);
   if (el) {
     document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
@@ -664,23 +608,10 @@ async function bx24(method, params = {}) {
 function flattenParams(obj, prefix, out) {
   for (const [key, val] of Object.entries(obj)) {
     const fk = prefix ? `${prefix}[${key}]` : key;
-    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
-      flattenParams(val, fk, out);
-    } else if (Array.isArray(val)) {
-      val.forEach((item, i) => out.append(`${fk}[${i}]`, item));
-    } else {
-      out.append(fk, val);
-    }
+    if (val !== null && typeof val === 'object' && !Array.isArray(val)) flattenParams(val, fk, out);
+    else if (Array.isArray(val)) val.forEach((item, i) => out.append(`${fk}[${i}]`, item));
+    else out.append(fk, val);
   }
-}
-
-async function bx24Batch(commands) {
-  const body = new URLSearchParams();
-  body.append('halt', '0');
-  for (const [key, cmd] of Object.entries(commands)) body.append(`cmd[${key}]`, cmd);
-  const resp = await fetch(WEBHOOK_URL + 'batch', { method: 'POST', body });
-  if (!resp.ok) throw new Error(`Batch HTTP ${resp.status}`);
-  return resp.json();
 }
 
 async function bx24FetchAll(method, params, progressCb) {
@@ -701,7 +632,6 @@ async function initConnection() {
   let url = document.getElementById('webhookUrl').value.trim();
   if (!url.endsWith('/')) url += '/';
   WEBHOOK_URL = url;
-
   const btn = document.getElementById('btnConnect');
   const status = document.getElementById('connectionStatus');
   btn.disabled = true; btn.textContent = 'Подключение...';
@@ -714,17 +644,14 @@ async function initConnection() {
     ]);
 
     let allUsers = (usersResult.result || []).map(u => ({
-      ID: u.ID,
-      name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
+      ID: u.ID, name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
     }));
-
     if (usersResult.next) {
       let ns = usersResult.next;
       while (ns) {
         const more = await bx24('user.get', { ACTIVE: 'true', start: ns });
         allUsers = allUsers.concat((more.result || []).map(u => ({
-          ID: u.ID,
-          name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
+          ID: u.ID, name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
         })));
         ns = more.next || null;
       }
@@ -732,33 +659,19 @@ async function initConnection() {
 
     const allowedUserNames = Object.keys(RETAIL_EMPLOYEES_MAP);
     users = allUsers.filter(u => allowedUserNames.includes(u.name));
-
     if (users.length === 0) {
       status.innerHTML = `<span class="status-badge disconnected"><span class="dot"></span>Нет сотрудников для розницы</span>`;
-      btn.textContent = 'Подключить';
-      btn.disabled = false;
-      return;
+      btn.textContent = 'Подключить'; btn.disabled = false; return;
     }
-
     users.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
-    const allowedFunnelsLower = [
-      'екб розница',
-      'крд розница',
-      'клд розница',
-      'мск розница',
-      'алм розница',
-      'аст розница'
-    ];
-
+    const allowedFunnelsLower = ['екб розница','крд розница','клд розница','мск розница','алм розница','аст розница'];
     categories = (catResult.result?.categories || [])
       .map(c => ({ id: String(c.id), name: c.name }))
       .filter(c => allowedFunnelsLower.includes(c.name.toLowerCase()));
 
-    // Populate searchable combo boxes
     const catOptions = [{ value: 'all', label: 'Все воронки' }, ...categories.map(c => ({ value: c.id, label: c.name }))];
     initComboBox('categoryCombo', catOptions, 'all');
-
     const userOptions = [{ value: 'all', label: 'Все сотрудники' }, ...users.map(u => ({ value: u.ID, label: u.name }))];
     initComboBox('userCombo', userOptions, 'all');
 
@@ -774,13 +687,10 @@ async function initConnection() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// DATA LOADING
+// DATA LOADING — Period-bound cohort analysis
 // ═══════════════════════════════════════════════════════════
 async function loadData() {
-  if (!fpInstance || fpInstance.selectedDates.length !== 2) { 
-    alert('Выберите начальную и конечную дату'); 
-    return; 
-  }
+  if (!fpInstance || fpInstance.selectedDates.length !== 2) { alert('Выберите начальную и конечную дату'); return; }
   const dateFrom = formatDate(fpInstance.selectedDates[0]);
   const dateTo = formatDate(fpInstance.selectedDates[1]);
   const userId = document.getElementById('userCombo').dataset.value;
@@ -793,44 +703,35 @@ async function loadData() {
   document.getElementById('funnelSection').style.display = '';
   document.getElementById('tableSection').style.display = '';
 
+  const COLS = 10;
   const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = `<tr><td colspan="9"><div class="state-message"><div class="spinner"></div>Загрузка данных...<p class="progress-text" id="progressText">Подготовка</p></div></td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="${COLS}"><div class="state-message"><div class="spinner"></div>Загрузка данных...<p class="progress-text" id="progressText">Подготовка</p></div></td></tr>`;
   document.getElementById('funnelChart').innerHTML = '<div class="state-message"><div class="spinner"></div></div>';
-  document.getElementById('spamValue').textContent = '...';
-  document.getElementById('spamPct').textContent = '';
-  document.getElementById('spamDetail').textContent = '';
-  document.getElementById('medianValue').textContent = '...';
-  document.getElementById('medianDetail').textContent = '';
+  ['spamValue','pendingValue','medianValue'].forEach(id => document.getElementById(id).textContent = '...');
+  ['spamPct','spamDetail','pendingPct','pendingDetail','medianDetail'].forEach(id => document.getElementById(id).textContent = '');
 
   try {
     const dateToNext = new Date(dateTo);
     dateToNext.setDate(dateToNext.getDate() + 1);
-    const dateToStr = formatDate(dateToNext);
-    
+    const dateToStr = formatDate(dateToNext); // exclusive upper bound
+
     const selUsers = userId === 'all' ? [] : userId.split(',');
     const selCats = categoryId === 'all' ? [] : categoryId.split(',');
-    
+
     let activeFunnelsLower = [];
-    if (selCats.length === 0) {
-      activeFunnelsLower = categories.map(c => c.name.toLowerCase());
-    } else {
-      activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
-    }
+    if (selCats.length === 0) activeFunnelsLower = categories.map(c => c.name.toLowerCase());
+    else activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
 
     let baseUsersByFunnel = users.filter(u => {
       const funnel = RETAIL_EMPLOYEES_MAP[u.name];
       return funnel && activeFunnelsLower.includes(funnel);
     });
-
     let targetUsers = baseUsersByFunnel;
-    if (selUsers.length > 0) {
-      targetUsers = baseUsersByFunnel.filter(u => selUsers.includes(String(u.ID)));
-    }
+    if (selUsers.length > 0) targetUsers = baseUsersByFunnel.filter(u => selUsers.includes(String(u.ID)));
 
     if (targetUsers.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9"><div class="state-message" style="color:var(--text-secondary)">Нет ответственных для данных воронок</div></td></tr>`;
-      btn.disabled = false; btn.textContent = 'Загрузить';
-      return;
+      tbody.innerHTML = `<tr><td colspan="${COLS}"><div class="state-message" style="color:var(--text-secondary)">Нет ответственных для данных воронок</div></td></tr>`;
+      btn.disabled = false; btn.textContent = 'Загрузить'; return;
     }
 
     let results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
@@ -846,16 +747,14 @@ async function loadData() {
     const totals = results.reduce((a, r) => {
       a.leads += r.leads; a.deals += r.deals;
       a.wonCount += r.wonCount; a.revenue += r.revenue;
-      a.spamCount += r.spamCount;
+      a.spamCount += r.spamCount; a.inProgressCount += r.inProgressCount;
       return a;
-    }, { leads: 0, deals: 0, wonCount: 0, revenue: 0, spamCount: 0 });
+    }, { leads: 0, deals: 0, wonCount: 0, revenue: 0, spamCount: 0, inProgressCount: 0 });
 
-    // Aggregate all processing times for median
     const allTimes = results.flatMap(r => r.processingTimes || []);
     const medianHours = calculateMedian(allTimes);
 
-    renderSpamMetric(totals);
-    renderMedianMetric(medianHours, allTimes.length);
+    renderMetrics(totals, medianHours, allTimes.length);
     renderFunnel(totals);
     renderTable(results);
 
@@ -864,102 +763,120 @@ async function loadData() {
     document.getElementById('tableSubtitle').textContent =
       `${d1} — ${d2} · ${results.length} сотрудников`;
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-message" style="color:var(--red)">Ошибка: ${err.message}</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${COLS}"><div class="state-message" style="color:var(--red)">Ошибка: ${err.message}</div></td></tr>`;
     console.error(err);
   }
   btn.disabled = false; btn.textContent = 'Загрузить';
 }
 
 async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) {
+  // dateTo is the exclusive upper boundary (day AFTER user-selected end date)
   const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
   const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
-  
   const targetUserIds = targetUsers.map(u => String(u.ID));
 
+  // ─── 1. Load leads created in period ───
   updateProgress('Загрузка когорты лидов...');
   const leadFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo };
-  if (targetUserIds.length > 0) Object.assign(leadFilter, { 'ASSIGNED_BY_ID': targetUserIds }); 
+  if (targetUserIds.length > 0) leadFilter.ASSIGNED_BY_ID = targetUserIds;
 
   const allLeads = await bx24FetchAll('crm.lead.list', {
     filter: leadFilter,
     select: ['ID', 'ASSIGNED_BY_ID', 'DATE_CREATE', 'DATE_CLOSED', 'STATUS_SEMANTIC_ID']
   }, (loaded, total) => updateProgress(`Лиды: ${loaded}/${total}`));
-  
+
   const cohortLeadIds = new Set(allLeads.map(l => String(l.ID)));
 
-  updateProgress('Загрузка связанных сделок...');
-  const dealFilter = { '>=DATE_CREATE': dateFrom };
+  // ─── 2. Load deals created in period (with upper bound!) ───
+  updateProgress('Загрузка сделок в периоде...');
+  const dealFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo };
   if (targetUserIds.length > 0) dealFilter.ASSIGNED_BY_ID = targetUserIds;
   if (selCats.length > 0) dealFilter.CATEGORY_ID = selCats.length === 1 ? selCats[0] : selCats;
-  
+
   const allDeals = await bx24FetchAll('crm.deal.list', {
     filter: dealFilter,
     select: ['ID', 'ASSIGNED_BY_ID', 'LEAD_ID', 'STAGE_SEMANTIC_ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE', 'DATE_CREATE']
   }, (loaded, total) => updateProgress(`Сделки: ${loaded}/${total}`));
 
-  // Фильтруем сделки: либо из когорты лидов, либо созданные напрямую в этот же период без лида
+  // Filter to cohort deals: from cohort leads OR created directly without lead
   const dbDateFrom = dateFrom.split('T')[0];
-  const dbDateToLimit = dateTo.split('T')[0];
-  
+  const dbDateTo = dateTo.split('T')[0]; // exclusive
+
   const cohortDeals = allDeals.filter(d => {
     if (d.LEAD_ID && cohortLeadIds.has(String(d.LEAD_ID))) return true;
     if (!d.LEAD_ID) {
       const dDateStr = (d.DATE_CREATE || '').split('T')[0];
-      if (dDateStr >= dbDateFrom && dDateStr < dbDateToLimit) return true;
+      if (dDateStr >= dbDateFrom && dDateStr < dbDateTo) return true;
     }
     return false;
   });
 
+  // ─── 3. Preload KZT rates ───
   const kztDates = new Set();
   cohortDeals.forEach(d => {
     if (d.STAGE_SEMANTIC_ID === 'S' && kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-        kztDates.add(d.CLOSEDATE.split('T')[0]);
+      kztDates.add(d.CLOSEDATE.split('T')[0]);
     }
   });
-
   if (kztDates.size > 0) {
     updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
     await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
   }
 
-  // Сбор статистики по юзерам
+  // ─── 4. Build per-user stats ───
   const stats = {};
   targetUsers.forEach(u => {
-    stats[u.ID] = { leads: 0, deals: 0, wonCount: 0, revenue: 0, spamCount: 0, processingTimes: [] };
+    stats[u.ID] = {
+      leads: 0, deals: 0, wonCount: 0, revenue: 0,
+      spamCount: 0, inProgressCount: 0, processingTimes: []
+    };
   });
 
+  // Lead stats — period-bound: only count events that happened WITHIN the period
   allLeads.forEach(l => {
     const s = stats[l.ASSIGNED_BY_ID];
     if (!s) return;
     s.leads++;
 
-    // Спам / Не наш профиль (STATUS_SEMANTIC_ID = F — провал)
-    if (l.STATUS_SEMANTIC_ID === 'F') {
+    const closedDate = l.DATE_CLOSED ? l.DATE_CLOSED.split('T')[0] : null;
+    const closedInPeriod = closedDate && closedDate >= dbDateFrom && closedDate < dbDateTo;
+
+    // Spam: only if closed within period with F status
+    if (closedInPeriod && l.STATUS_SEMANTIC_ID === 'F') {
       s.spamCount++;
     }
 
-    // Время обработки: DATE_CLOSED − DATE_CREATE
-    if (l.DATE_CLOSED && l.DATE_CREATE) {
+    // In progress: NOT closed by end of period
+    if (!closedDate || closedDate >= dbDateTo) {
+      s.inProgressCount++;
+    }
+
+    // Processing time: only for leads closed within period
+    if (closedInPeriod && l.DATE_CREATE) {
       const created = new Date(l.DATE_CREATE);
       const closed = new Date(l.DATE_CLOSED);
       const hours = (closed - created) / (1000 * 60 * 60);
-      if (hours >= 0 && isFinite(hours)) {
-        s.processingTimes.push(hours);
-      }
+      if (hours >= 0 && isFinite(hours)) s.processingTimes.push(hours);
     }
   });
 
+  // Deal stats — period-bound: won only if CLOSEDATE within period
   for (const d of cohortDeals) {
     const s = stats[d.ASSIGNED_BY_ID];
     if (!s) continue;
     s.deals++;
-    if (d.STAGE_SEMANTIC_ID === 'S') {
-       s.wonCount++;
-       let val = parseFloat(d.OPPORTUNITY || 0);
-       if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-          val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
-       }
-       s.revenue += val;
+
+    const dealCloseDate = d.CLOSEDATE ? d.CLOSEDATE.split('T')[0] : null;
+    const wonInPeriod = d.STAGE_SEMANTIC_ID === 'S'
+      && dealCloseDate && dealCloseDate >= dbDateFrom && dealCloseDate < dbDateTo;
+
+    if (wonInPeriod) {
+      s.wonCount++;
+      let val = parseFloat(d.OPPORTUNITY || 0);
+      if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+        val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
+      }
+      s.revenue += val;
     }
   }
 
@@ -970,18 +887,12 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
       : null;
     return {
       id: u.ID, name: u.name,
-      leads: s.leads,
-      deals: s.deals,
-      wonCount: s.wonCount,
-      revenue: s.revenue,
-      spamCount: s.spamCount,
-      avgProcessingHours: avgH,
-      processingTimes: s.processingTimes
+      leads: s.leads, deals: s.deals, wonCount: s.wonCount, revenue: s.revenue,
+      spamCount: s.spamCount, inProgressCount: s.inProgressCount,
+      avgProcessingHours: avgH, processingTimes: s.processingTimes
     };
   });
 }
-
-
 
 function updateProgress(text) {
   const el = document.getElementById('progressText');
@@ -991,21 +902,27 @@ function updateProgress(text) {
 // ═══════════════════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════════════════
-function renderSpamMetric(totals) {
+function renderMetrics(totals, medianHours, sampleCount) {
+  // Spam
   document.getElementById('spamValue').textContent = totals.spamCount.toLocaleString('ru-RU');
-  const pct = totals.leads > 0 ? (totals.spamCount / totals.leads * 100).toFixed(1) : '0';
-  document.getElementById('spamPct').textContent = ` (${pct}%)`;
-  document.getElementById('spamDetail').textContent = `из ${totals.leads.toLocaleString('ru-RU')} лидов отклонено`;
-}
+  const spamPct = totals.leads > 0 ? (totals.spamCount / totals.leads * 100).toFixed(1) : '0';
+  document.getElementById('spamPct').textContent = ` (${spamPct}%)`;
+  document.getElementById('spamDetail').textContent = `закрыто в спам из ${totals.leads.toLocaleString('ru-RU')} лидов`;
 
-function renderMedianMetric(medianHours, totalSamples) {
-  if (medianHours === null || totalSamples === 0) {
+  // In progress
+  document.getElementById('pendingValue').textContent = totals.inProgressCount.toLocaleString('ru-RU');
+  const pendPct = totals.leads > 0 ? (totals.inProgressCount / totals.leads * 100).toFixed(1) : '0';
+  document.getElementById('pendingPct').textContent = ` (${pendPct}%)`;
+  document.getElementById('pendingDetail').textContent = `не обработаны на конец периода`;
+
+  // Median
+  if (medianHours === null || sampleCount === 0) {
     document.getElementById('medianValue').textContent = '—';
-    document.getElementById('medianDetail').textContent = 'нет закрытых лидов';
-    return;
+    document.getElementById('medianDetail').textContent = 'нет закрытых лидов в периоде';
+  } else {
+    document.getElementById('medianValue').textContent = formatDuration(medianHours);
+    document.getElementById('medianDetail').textContent = `по ${sampleCount} обработанным лидам`;
   }
-  document.getElementById('medianValue').textContent = formatDuration(medianHours);
-  document.getElementById('medianDetail').textContent = `по ${totalSamples} обработанным лидам`;
 }
 
 function renderFunnel(totals) {
@@ -1014,7 +931,6 @@ function renderFunnel(totals) {
     { label: 'Сделки', value: totals.deals, idx: 1 },
     { label: 'Успешные', value: totals.wonCount, idx: 2 }
   ];
-
   const maxVal = Math.max(totals.leads, 1);
 
   let html = '';
@@ -1023,30 +939,34 @@ function renderFunnel(totals) {
     const pct = (step.value / maxVal) * 100;
     const w = Math.max(8, pct);
     const isNarrow = w < 25;
-    
+
     html += `<div class="funnel-stage fade-in ${isNarrow ? 'narrow' : ''}" style="animation-delay:${i * 0.06}s">
       <div class="funnel-bar fb-${step.idx}" style="width:${w}%"><span class="fv">${val}</span><span class="fl">${step.label}</span></div>
       <span class="funnel-label-ext">${step.label}</span>
     </div>`;
-    
+
     if (i < steps.length - 1) {
       const rate = step.value > 0 ? ((steps[i + 1].value / step.value) * 100).toFixed(1) : '—';
-      let gapExtra = '';
-      // Show spam loss in the first gap (Leads → Deals)
-      if (i === 0 && totals.spamCount > 0) {
-        const spamPct = (totals.spamCount / totals.leads * 100).toFixed(1);
-        gapExtra = `<span class="fg-spam">✕ ${totals.spamCount} отклонено (${spamPct}%)</span>`;
+      let extras = '';
+      if (i === 0) {
+        // Between Leads → Deals: show spam + in-progress
+        if (totals.spamCount > 0) {
+          const sp = (totals.spamCount / totals.leads * 100).toFixed(1);
+          extras += `<span class="fg-spam">✕ ${totals.spamCount} спам (${sp}%)</span>`;
+        }
+        if (totals.inProgressCount > 0) {
+          const pp = (totals.inProgressCount / totals.leads * 100).toFixed(1);
+          extras += `<span class="fg-pending">⏳ ${totals.inProgressCount} в работе (${pp}%)</span>`;
+        }
       }
       html += `<div class="funnel-gap fade-in" style="animation-delay:${i * 0.06 + 0.03}s">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-        <span class="fg-badge">${rate}%</span>${gapExtra}
+        <span class="fg-badge">${rate}%</span>${extras}
       </div>`;
     }
   });
 
-  // Блок выручки
-  html += `
-  <div class="funnel-revenue fade-in" style="animation-delay:${steps.length * 0.06}s">
+  html += `<div class="funnel-revenue fade-in" style="animation-delay:${steps.length * 0.06}s">
     <div class="funnel-revenue-inner">
       <span class="rev-label">Выручка</span>
       <span class="rev-val">${formatMoney(totals.revenue)}</span>
@@ -1057,9 +977,10 @@ function renderFunnel(totals) {
 }
 
 function renderTable(results) {
+  const COLS = 10;
   const tbody = document.getElementById('tableBody');
   if (results.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="state-message">Нет данных за выбранный период</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${COLS}"><div class="state-message">Нет данных за выбранный период</div></td></tr>`;
     return;
   }
   tbody.innerHTML = results.map((r, i) => {
@@ -1070,6 +991,7 @@ function renderTable(results) {
       <td class="name-cell">${escHtml(r.name)}</td>
       <td class="num highlight-blue">${r.leads.toLocaleString('ru-RU')}</td>
       <td class="num highlight-red">${r.spamCount.toLocaleString('ru-RU')}</td>
+      <td class="num highlight-orange">${r.inProgressCount.toLocaleString('ru-RU')}</td>
       <td class="num">${r.deals.toLocaleString('ru-RU')}</td>
       <td class="num highlight-green">${r.wonCount.toLocaleString('ru-RU')}</td>
       <td class="num">${r.conversion.toFixed(1)}%</td>
@@ -1086,12 +1008,8 @@ function setupSorting() {
   document.querySelectorAll('thead th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
-      if (currentSort.key === key) {
-        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
-      } else {
-        currentSort.key = key;
-        currentSort.dir = key === 'name' ? 'asc' : 'desc';
-      }
+      if (currentSort.key === key) currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+      else { currentSort.key = key; currentSort.dir = key === 'name' ? 'asc' : 'desc'; }
       sortResults();
       renderTable(lastResults);
       document.querySelectorAll('thead th').forEach(t => {
@@ -1108,8 +1026,8 @@ function sortResults() {
   const { key, dir } = currentSort;
   lastResults.sort((a, b) => {
     let va = a[key], vb = b[key];
-    if (va === null) va = -Infinity;
-    if (vb === null) vb = -Infinity;
+    if (va === null || va === undefined) va = -Infinity;
+    if (vb === null || vb === undefined) vb = -Infinity;
     if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb, 'ru') : vb.localeCompare(va, 'ru');
     return dir === 'asc' ? va - vb : vb - va;
   });
@@ -1124,18 +1042,15 @@ function formatMoney(amount) {
 }
 
 function formatDuration(hours) {
-  if (hours < 1) {
-    const mins = Math.round(hours * 60);
-    return mins + 'м';
-  }
+  if (hours < 1) return Math.round(hours * 60) + 'м';
   if (hours < 24) {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
     return m > 0 ? `${h}ч ${m}м` : `${h}ч`;
   }
   const days = Math.floor(hours / 24);
-  const remainH = Math.floor(hours % 24);
-  return remainH > 0 ? `${days}д ${remainH}ч` : `${days}д`;
+  const rh = Math.floor(hours % 24);
+  return rh > 0 ? `${days}д ${rh}ч` : `${days}д`;
 }
 
 function calculateMedian(arr) {
@@ -1145,28 +1060,15 @@ function calculateMedian(arr) {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-function animateNumber(id, target) {
-  const el = document.getElementById(id);
-  if (target === 0) { el.textContent = '0'; return; }
-  const dur = 500, t0 = performance.now();
-  const tick = (now) => {
-    const p = Math.min((now - t0) / dur, 1);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('ru-RU');
-    if (p < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
-
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 // ═══════════════════════════════════════════════════════════
-// COMBO BOX (Searchable Select)
+// COMBO BOX
 // ═══════════════════════════════════════════════════════════
 function initComboBox(comboId, options, selectedValue) {
   const box = document.getElementById(comboId);
   const input = box.querySelector('.combo-input');
   const dropdown = box.querySelector('.combo-dropdown');
-
   box._options = options;
   box._selected = new Set([String(selectedValue)]);
   box._highlighted = -1;
@@ -1194,27 +1096,18 @@ function initComboBox(comboId, options, selectedValue) {
       box.dataset.value = Array.from(box._selected).join(',');
     }
   }
-
   updateInput();
 
   function renderDropdown(filter = '') {
     const q = filter.toLowerCase();
-    const filtered = q
-      ? box._options.filter(o => o.label.toLowerCase().includes(q))
-      : box._options;
-
-    if (filtered.length === 0) {
-      dropdown.innerHTML = '<div class="combo-empty">Ничего не найдено</div>';
-      return;
-    }
-
+    const filtered = q ? box._options.filter(o => o.label.toLowerCase().includes(q)) : box._options;
+    if (filtered.length === 0) { dropdown.innerHTML = '<div class="combo-empty">Ничего не найдено</div>'; return; }
     dropdown.innerHTML = filtered.map((o, i) => {
       const v = String(o.value);
       const isSel = box._selected.has('all') || box._selected.has(v);
-      const chk = `<input type="checkbox" ${isSel ? 'checked' : ''} style="margin-right:8px; pointer-events:none; accent-color: var(--accent);">`;
+      const chk = `<input type="checkbox" ${isSel ? 'checked' : ''} style="margin-right:8px;pointer-events:none;accent-color:var(--accent);">`;
       return `<div class="combo-option ${isSel ? 'selected' : ''}" data-value="${escHtml(v)}" data-idx="${i}" title="${escHtml(o.label)}">${chk}${highlightMatch(o.label, q)}</div>`;
     }).join('');
-
     box._highlighted = -1;
   }
 
@@ -1222,175 +1115,90 @@ function initComboBox(comboId, options, selectedValue) {
     if (!q) return escHtml(text);
     const idx = text.toLowerCase().indexOf(q);
     if (idx === -1) return escHtml(text);
-    return escHtml(text.slice(0, idx)) +
-      '<b style="color:var(--accent)">' + escHtml(text.slice(idx, idx + q.length)) + '</b>' +
-      escHtml(text.slice(idx + q.length));
+    return escHtml(text.slice(0, idx)) + '<b style="color:var(--accent)">' + escHtml(text.slice(idx, idx + q.length)) + '</b>' + escHtml(text.slice(idx + q.length));
   }
 
-  function openDropdown() {
-    box.classList.add('open');
-    renderDropdown(input.value === input._displayLabel ? '' : input.value);
-  }
-
-  function closeDropdown() {
-    box.classList.remove('open');
-    input.value = input._displayLabel;
-  }
+  function openDropdown() { box.classList.add('open'); renderDropdown(input.value === input._displayLabel ? '' : input.value); }
+  function closeDropdown() { box.classList.remove('open'); input.value = input._displayLabel; }
 
   function toggleOption(val) {
     if (val === 'all') {
-      if (box._selected.has('all')) {
-        box._selected.clear();
-      } else {
-        box._selected.clear();
-        box._selected.add('all');
-      }
+      if (box._selected.has('all')) box._selected.clear();
+      else { box._selected.clear(); box._selected.add('all'); }
     } else {
       if (box._selected.has('all')) {
         box._selected.delete('all');
-        options.forEach(o => {
-          if (String(o.value) !== 'all' && String(o.value) !== val) {
-            box._selected.add(String(o.value));
-          }
-        });
+        options.forEach(o => { if (String(o.value) !== 'all' && String(o.value) !== val) box._selected.add(String(o.value)); });
       } else {
-        if (box._selected.has(val)) {
-          box._selected.delete(val);
-        } else {
-          box._selected.add(val);
-        }
+        if (box._selected.has(val)) box._selected.delete(val);
+        else box._selected.add(val);
       }
     }
-    
-    if (box._selected.size === options.length - 1) { // minus 'all' option
+    if (box._selected.size === options.length - 1) {
       const allNonAll = options.filter(o => String(o.value) !== 'all');
-      const allSelected = allNonAll.every(o => box._selected.has(String(o.value)));
-      if (allSelected) {
-        box._selected.clear();
-        box._selected.add('all');
-      }
+      if (allNonAll.every(o => box._selected.has(String(o.value)))) { box._selected.clear(); box._selected.add('all'); }
     }
-
     updateInput();
     renderDropdown(input.value === input._displayLabel ? '' : input.value);
   }
 
-  // Event: Click on input/box → open and select text for typing
-  input.addEventListener('focus', () => {
-    if (!box.classList.contains('open')) {
-      openDropdown();
-      input.select();
-    }
-  });
-
+  input.addEventListener('focus', () => { if (!box.classList.contains('open')) { openDropdown(); input.select(); } });
   box.addEventListener('click', (e) => {
-    // Prevent dropdown self-clicks from closing
     if (e.target.closest('.combo-dropdown')) return;
-
-    if (box.classList.contains('open')) {
-      if (e.target === input) {
-        input.select(); // Let user type further without closing
-      } else {
-        closeDropdown();
-      }
-    } else {
-      input.focus();
-      openDropdown();
-      input.select();
-    }
+    if (box.classList.contains('open')) { if (e.target === input) input.select(); else closeDropdown(); }
+    else { input.focus(); openDropdown(); input.select(); }
   });
+  input.addEventListener('input', () => { if (!box.classList.contains('open')) box.classList.add('open'); renderDropdown(input.value); });
 
-  // Event: Typing → filter
-  input.addEventListener('input', () => {
-    if (!box.classList.contains('open')) box.classList.add('open');
-    renderDropdown(input.value);
-  });
-
-  // Event: Click on option
   dropdown.addEventListener('click', (e) => {
     const opt = e.target.closest('.combo-option');
     if (!opt) return;
-    
     e.stopPropagation();
     toggleOption(opt.dataset.value);
-
-    // Sync categories to users automatically
-    if (comboId === 'categoryCombo' && window.syncUsersWithCategories) {
-      window.syncUsersWithCategories();
-    }
+    if (comboId === 'categoryCombo' && window.syncUsersWithCategories) window.syncUsersWithCategories();
   });
 
-  // Event: Keyboard
   input.addEventListener('keydown', (e) => {
     const items = dropdown.querySelectorAll('.combo-option');
     if (!items.length) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      box._highlighted = Math.min(box._highlighted + 1, items.length - 1);
-      updateHighlight(items);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      box._highlighted = Math.max(box._highlighted - 1, 0);
-      updateHighlight(items);
-    } else if (e.key === 'Enter') {
+    if (e.key === 'ArrowDown') { e.preventDefault(); box._highlighted = Math.min(box._highlighted + 1, items.length - 1); updateHighlight(items); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); box._highlighted = Math.max(box._highlighted - 1, 0); updateHighlight(items); }
+    else if (e.key === 'Enter') {
       e.preventDefault();
       if (box._highlighted >= 0 && items[box._highlighted]) {
-        const opt = items[box._highlighted];
-        toggleOption(opt.dataset.value);
-        if (comboId === 'categoryCombo' && window.syncUsersWithCategories) {
-          window.syncUsersWithCategories();
-        }
+        toggleOption(items[box._highlighted].dataset.value);
+        if (comboId === 'categoryCombo' && window.syncUsersWithCategories) window.syncUsersWithCategories();
       }
-    } else if (e.key === 'Escape') {
-      closeDropdown();
-      input.blur();
     }
+    else if (e.key === 'Escape') { closeDropdown(); input.blur(); }
   });
 
   function updateHighlight(items) {
     items.forEach((it, i) => it.classList.toggle('highlighted', i === box._highlighted));
-    if (items[box._highlighted]) {
-      items[box._highlighted].scrollIntoView({ block: 'nearest' });
-    }
+    if (items[box._highlighted]) items[box._highlighted].scrollIntoView({ block: 'nearest' });
   }
 
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!box.contains(e.target)) closeDropdown();
-  });
+  document.addEventListener('click', (e) => { if (!box.contains(e.target)) closeDropdown(); });
 }
 
-// Ensure the sync logic is globally available
 window.syncUsersWithCategories = function() {
   const categoryId = document.getElementById('categoryCombo').dataset.value;
   const selCats = categoryId === 'all' ? [] : categoryId.split(',');
-
   let activeFunnelsLower = [];
-  if (selCats.length === 0) {
-    activeFunnelsLower = categories.map(c => c.name.toLowerCase());
-  } else {
-    activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
-  }
+  if (selCats.length === 0) activeFunnelsLower = categories.map(c => c.name.toLowerCase());
+  else activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
 
   const userBox = document.getElementById('userCombo');
   const newSet = new Set();
-  
-  if (selCats.length === 0) {
-    newSet.add('all');
-  } else {
+  if (selCats.length === 0) newSet.add('all');
+  else {
     users.forEach(u => {
       const funnel = RETAIL_EMPLOYEES_MAP[u.name];
-      if (funnel && activeFunnelsLower.includes(funnel)) {
-        newSet.add(String(u.ID));
-      }
+      if (funnel && activeFunnelsLower.includes(funnel)) newSet.add(String(u.ID));
     });
     if (newSet.size === 0) newSet.add('none');
   }
-  
-  if (userBox.updateSelection) {
-    userBox.updateSelection(newSet);
-  }
+  if (userBox.updateSelection) userBox.updateSelection(newSet);
 };
 </script>
 </body>
