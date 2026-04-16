@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Сквозная аналитика по ответственным — Битрикс24</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
       --bg: #ffffff;
@@ -391,12 +394,6 @@
       <p>Битрикс24 CRM — лиды, сделки, выручка в разрезе ответственных</p>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" id="tabClassic" onclick="switchTab('classic')">Классическая воронка</button>
-      <button class="tab-btn" id="tabCohort" onclick="switchTab('cohort')">Когортный анализ</button>
-    </div>
-
     <!-- Webhook Settings (скрыто для безопасности) -->
     <div class="card" style="display:none;">
       <div class="settings-bar">
@@ -412,21 +409,13 @@
       <div class="filters-grid">
         <!-- Row 1: Dates -->
         <!-- Row 1: Dates -->
-        <div class="fg-dates filter-group">
-          <label class="radio-label">
-            <input type="radio" name="periodMode" value="custom" id="modeCustom" checked onchange="togglePeriodMode()"> Произвольный период
-          </label>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <input type="date" id="dateFrom" onchange="document.getElementById('modeCustom').checked=true; togglePeriodMode()">
-            <span style="color:var(--text-muted);font-weight:600">—</span>
-            <input type="date" id="dateTo" onchange="document.getElementById('modeCustom').checked=true; togglePeriodMode()">
-          </div>
+        <div class="fg-dates filter-group" style="flex:2;">
+          <label>Период анализа</label>
+          <input type="text" id="dateRangePicker" class="b24-input" style="width: 100%; box-sizing: border-box; padding: 10px 14px; font-family: inherit; font-size: 13px; color: var(--text-primary); background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;" placeholder="Выберите даты">
         </div>
         <!-- Row 1: Presets -->
         <div class="fg-presets filter-group">
-          <label class="radio-label">
-            <input type="radio" name="periodMode" value="preset" id="modePreset" onchange="togglePeriodMode()"> Быстрый выбор
-          </label>
+          <label>Быстрый выбор</label>
           <div class="period-presets" id="quickDates">
             <button onclick="setPeriod('today', this)">Сегодня</button>
             <button onclick="setPeriod('week', this)">Неделя</button>
@@ -609,17 +598,7 @@ let users = [];
 let categories = [];
 let currentSort = { key: 'revenue', dir: 'desc' };
 let lastResults = [];
-let currentAnalysisTab = 'classic';
-
-function switchTab(tab) {
-  currentAnalysisTab = tab;
-  document.getElementById('tabClassic').classList.toggle('active', tab === 'classic');
-  document.getElementById('tabCohort').classList.toggle('active', tab === 'cohort');
-  
-  if (document.getElementById('kpiGrid').style.display !== 'none') {
-    loadData();
-  }
-}
+let fpInstance = null;
 
 // ═══════════════════════════════════════════════════════════
 // INIT
@@ -627,36 +606,27 @@ function switchTab(tab) {
 document.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('b24_webhook') || DEFAULT_WEBHOOK;
   document.getElementById('webhookUrl').value = saved;
-  setDefaultDates();
+  initDatepicker();
   setupSorting();
   if (saved) initConnection();
 });
 
-function togglePeriodMode() {
-  const isCustom = document.getElementById('modeCustom').checked;
-  document.getElementById('dateFrom').disabled = !isCustom;
-  document.getElementById('dateTo').disabled = !isCustom;
-  
-  const presets = document.querySelectorAll('#quickDates button');
-  presets.forEach(btn => btn.disabled = isCustom);
-
-  if (!isCustom) {
-    if (!document.querySelector('#quickDates button.active')) {
-      const el = document.querySelector('#quickDates button:nth-child(3)');
-      if (el) setPeriod('month', el);
+function initDatepicker() {
+  // Инициализация календаря для периодов
+  fpInstance = flatpickr("#dateRangePicker", {
+    mode: "range",
+    showMonths: window.innerWidth > 768 ? 2 : 1,
+    locale: "ru",
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d.m.Y",
+    defaultDate: [new Date(), new Date()],
+    onChange: function(selectedDates) {
+      if (selectedDates.length === 2) {
+        document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
+      }
     }
-  } else {
-    presets.forEach(btn => btn.classList.remove('active'));
-  }
-}
-
-function setDefaultDates() {
-  const now = new Date();
-  document.getElementById('dateFrom').value = formatDate(now);
-  document.getElementById('dateTo').value = formatDate(now);
-  
-  document.getElementById('modeCustom').checked = true;
-  togglePeriodMode();
+  });
 }
 
 function formatDate(d) { return d.toISOString().split('T')[0]; }
@@ -676,12 +646,12 @@ function setPeriod(type, el) {
       break;
     case 'year': from = new Date(now.getFullYear(), 0, 1); break;
   }
-  document.getElementById('dateFrom').value = formatDate(from);
-  document.getElementById('dateTo').value = formatDate(now);
+  
+  if (fpInstance) {
+    fpInstance.setDate([from, now]);
+  }
   
   if (el) {
-    document.getElementById('modePreset').checked = true;
-    togglePeriodMode();
     document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
   }
@@ -814,11 +784,14 @@ async function initConnection() {
 // DATA LOADING
 // ═══════════════════════════════════════════════════════════
 async function loadData() {
-  const dateFrom = document.getElementById('dateFrom').value;
-  const dateTo = document.getElementById('dateTo').value;
+  if (!fpInstance || fpInstance.selectedDates.length !== 2) { 
+    alert('Выберите начальную и конечную дату'); 
+    return; 
+  }
+  const dateFrom = formatDate(fpInstance.selectedDates[0]);
+  const dateTo = formatDate(fpInstance.selectedDates[1]);
   const userId = document.getElementById('userCombo').dataset.value;
   const categoryId = document.getElementById('categoryCombo').dataset.value;
-  if (!dateFrom || !dateTo) { alert('Выберите период'); return; }
 
   const btn = document.getElementById('btnLoad');
   btn.disabled = true; btn.textContent = 'Загрузка...';
@@ -866,23 +839,10 @@ async function loadData() {
       return;
     }
 
-    let results;
-    if (currentAnalysisTab === 'cohort') {
-      results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
-    } else {
-      if (targetUsers.length <= 3) {
-        results = await loadSingleUsers(targetUsers, dateFrom, dateToStr, selCats);
-      } else {
-        results = await loadBatchUsers(targetUsers, dateFrom, dateToStr, selCats);
-      }
-    }
+    const results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
 
     if (selUsers.length === 0) {
-      if (selCats.length > 0 && currentAnalysisTab === 'classic') {
-        results = results.filter(r => r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
-      } else {
-        results = results.filter(r => r.leads > 0 || r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
-      }
+      results = results.filter(r => r.leads > 0 || r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
     }
     results.forEach(r => { r.conversion = r.deals > 0 ? (r.wonCount / r.deals * 100) : 0; });
 
@@ -995,141 +955,7 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
   }));
 }
 
-async function loadSingleUsers(targetUsers, dateFrom, dateTo, selCats) {
-  const results = [];
-  const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
-  const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
 
-  for (const user of targetUsers) {
-    updateProgress(`${user.name}...`);
-    const leadRes = await bx24('crm.lead.list', {
-      filter: { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, ASSIGNED_BY_ID: user.ID },
-      select: ['ID'], start: 0
-    });
-    const dealFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, ASSIGNED_BY_ID: user.ID };
-    if (selCats.length === 1) dealFilter.CATEGORY_ID = selCats[0];
-    else if (selCats.length > 1) dealFilter.CATEGORY_ID = selCats;
-    
-    const dealRes = await bx24('crm.deal.list', { filter: dealFilter, select: ['ID'], start: 0 });
-    const wonDeals = await bx24FetchAll('crm.deal.list', {
-      filter: { ...dealFilter, STAGE_SEMANTIC_ID: 'S' }, select: ['ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE']
-    });
-
-    const kztDates = new Set();
-    for (const d of wonDeals) {
-      if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-        kztDates.add(d.CLOSEDATE.split('T')[0]);
-      }
-    }
-    if (kztDates.size > 0) {
-      updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
-      await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
-    }
-
-    let revenue = 0;
-    for (const d of wonDeals) {
-      let val = parseFloat(d.OPPORTUNITY || 0);
-      if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-        val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
-      }
-      revenue += val;
-    }
-
-    results.push({
-      id: user.ID, name: user.name,
-      leads: leadRes.total || 0, deals: dealRes.total || 0,
-      wonCount: wonDeals.length,
-      revenue: revenue
-    });
-  }
-  return results;
-}
-
-async function loadBatchUsers(targetUsers, dateFrom, dateTo, selCats) {
-  updateProgress('Подсчёт лидов...');
-  const leadCmd = {}, dealCmd = {};
-  for (const user of targetUsers) {
-    const lp = new URLSearchParams();
-    lp.set('filter[>=DATE_CREATE]', dateFrom);
-    lp.set('filter[<DATE_CREATE]', dateTo);
-    lp.set('filter[ASSIGNED_BY_ID]', user.ID);
-    lp.set('select[0]', 'ID');
-    lp.set('start', '0');
-    leadCmd[`l${user.ID}`] = `crm.lead.list?${lp}`;
-
-    const dp = new URLSearchParams();
-    dp.set('filter[>=DATE_CREATE]', dateFrom);
-    dp.set('filter[<DATE_CREATE]', dateTo);
-    dp.set('filter[ASSIGNED_BY_ID]', user.ID);
-    if (selCats.length === 1) {
-      dp.set('filter[CATEGORY_ID]', selCats[0]);
-    } else if (selCats.length > 1) {
-      selCats.forEach((c, idx) => dp.append(`filter[CATEGORY_ID][${idx}]`, c));
-    }
-    dp.set('select[0]', 'ID');
-    dp.set('start', '0');
-    dealCmd[`d${user.ID}`] = `crm.deal.list?${dp}`;
-  }
-
-  const batchExec = async (cmds, label) => {
-    const entries = Object.entries(cmds);
-    const totals = {};
-    for (let i = 0; i < entries.length; i += 50) {
-      updateProgress(`${label} (${Math.min(i + 50, entries.length)}/${entries.length})...`);
-      const chunk = Object.fromEntries(entries.slice(i, i + 50));
-      const res = await bx24Batch(chunk);
-      if (res.result?.result_total) Object.assign(totals, res.result.result_total);
-    }
-    return totals;
-  };
-
-  const leadTotals = await batchExec(leadCmd, 'Лиды');
-  updateProgress('Подсчёт сделок...');
-  const dealTotals = await batchExec(dealCmd, 'Сделки');
-
-  updateProgress('Загрузка успешных сделок...');
-  const wonFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, STAGE_SEMANTIC_ID: 'S' };
-  if (selCats.length === 1) wonFilter.CATEGORY_ID = selCats[0];
-  else if (selCats.length > 1) wonFilter.CATEGORY_ID = selCats;
-  
-  const allWon = await bx24FetchAll('crm.deal.list', {
-    filter: wonFilter, select: ['ID', 'ASSIGNED_BY_ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE']
-  }, (loaded, total) => updateProgress(`Успешные сделки: ${loaded}/${total}`));
-
-  const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
-  const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
-  const kztDates = new Set();
-  for (const d of allWon) {
-    if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-      kztDates.add(d.CLOSEDATE.split('T')[0]);
-    }
-  }
-  if (kztDates.size > 0) {
-    updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
-    await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
-  }
-
-  const wonByUser = {};
-  for (const d of allWon) {
-    const uid = d.ASSIGNED_BY_ID;
-    if (!wonByUser[uid]) wonByUser[uid] = { count: 0, revenue: 0 };
-    wonByUser[uid].count++;
-    
-    let val = parseFloat(d.OPPORTUNITY || 0);
-    if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
-      val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
-    }
-    wonByUser[uid].revenue += val;
-  }
-
-  return targetUsers.map(u => ({
-    id: u.ID, name: u.name,
-    leads: leadTotals[`l${u.ID}`] || 0,
-    deals: dealTotals[`d${u.ID}`] || 0,
-    wonCount: wonByUser[u.ID]?.count || 0,
-    revenue: wonByUser[u.ID]?.revenue || 0
-  }));
-}
 
 function updateProgress(text) {
   const el = document.getElementById('progressText');
@@ -1277,6 +1103,11 @@ function initComboBox(comboId, options, selectedValue) {
   box._selected = new Set([String(selectedValue)]);
   box._highlighted = -1;
 
+  box.updateSelection = function(newSet) {
+    box._selected = new Set(newSet);
+    updateInput();
+  };
+
   function updateInput() {
     if (box._selected.has('all')) {
       const allOpt = options.find(o => String(o.value) === 'all');
@@ -1370,7 +1201,6 @@ function initComboBox(comboId, options, selectedValue) {
 
     updateInput();
     renderDropdown(input.value === input._displayLabel ? '' : input.value);
-    input.focus();
   }
 
   // Event: Click on input/box → open and select text for typing
@@ -1382,16 +1212,18 @@ function initComboBox(comboId, options, selectedValue) {
   });
 
   box.addEventListener('click', (e) => {
-    if (e.target !== input && e.target.closest('.combo-dropdown') === null) {
-      if (box.classList.contains('open')) {
-        closeDropdown();
+    // Prevent dropdown self-clicks from closing
+    if (e.target.closest('.combo-dropdown')) return;
+
+    if (box.classList.contains('open')) {
+      if (e.target === input) {
+        input.select(); // Let user type further without closing
       } else {
-        input.focus();
-        openDropdown();
-        input.select();
+        closeDropdown();
       }
-    } else if (e.target === input) {
-      if (!box.classList.contains('open')) openDropdown();
+    } else {
+      input.focus();
+      openDropdown();
       input.select();
     }
   });
@@ -1406,8 +1238,14 @@ function initComboBox(comboId, options, selectedValue) {
   dropdown.addEventListener('click', (e) => {
     const opt = e.target.closest('.combo-option');
     if (!opt) return;
+    
     e.stopPropagation();
     toggleOption(opt.dataset.value);
+
+    // Sync categories to users automatically
+    if (comboId === 'categoryCombo' && window.syncUsersWithCategories) {
+      window.syncUsersWithCategories();
+    }
   });
 
   // Event: Keyboard
@@ -1428,6 +1266,9 @@ function initComboBox(comboId, options, selectedValue) {
       if (box._highlighted >= 0 && items[box._highlighted]) {
         const opt = items[box._highlighted];
         toggleOption(opt.dataset.value);
+        if (comboId === 'categoryCombo' && window.syncUsersWithCategories) {
+          window.syncUsersWithCategories();
+        }
       }
     } else if (e.key === 'Escape') {
       closeDropdown();
@@ -1446,6 +1287,38 @@ function initComboBox(comboId, options, selectedValue) {
   document.addEventListener('click', (e) => {
     if (!box.contains(e.target)) closeDropdown();
   });
-}</script>
+}
+
+// Ensure the sync logic is globally available
+window.syncUsersWithCategories = function() {
+  const categoryId = document.getElementById('categoryCombo').dataset.value;
+  const selCats = categoryId === 'all' ? [] : categoryId.split(',');
+
+  let activeFunnelsLower = [];
+  if (selCats.length === 0) {
+    activeFunnelsLower = categories.map(c => c.name.toLowerCase());
+  } else {
+    activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
+  }
+
+  const userBox = document.getElementById('userCombo');
+  const newSet = new Set();
+  
+  if (selCats.length === 0) {
+    newSet.add('all');
+  } else {
+    users.forEach(u => {
+      const funnel = RETAIL_EMPLOYEES_MAP[u.name];
+      if (funnel && activeFunnelsLower.includes(funnel)) {
+        newSet.add(String(u.ID));
+      }
+    });
+    if (newSet.size === 0) newSet.add('none');
+  }
+  
+  if (userBox.updateSelection) {
+    userBox.updateSelection(newSet);
+  }
+};</script>
 </body>
 </html>
