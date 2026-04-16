@@ -526,6 +526,30 @@
 // ═══════════════════════════════════════════════════════════
 const DEFAULT_WEBHOOK = 'https://tstarter.bitrix24.ru/rest/19294/sf99bv6v2j28o0jg/';
 
+const RETAIL_EMPLOYEES_MAP = {
+  "Сервис Горки Склад": "мск розница",
+  "Братеево Розница": "мск розница",
+  "Александр Куликов": "мск розница",
+  "ЕКБ ТКАЧЕЙ": "екб розница",
+  "ЕКБ Автомагистральная": "екб розница",
+  "ЕКБ Металлургов": "екб розница",
+  "ЕКБ Шефская": "екб розница",
+  "ЕКБ Бебеля": "екб розница",
+  "ЕКБ Березовский": "екб розница",
+  "Сергей Селиванов": "крд розница",
+  "Евгений Лебедев": "крд розница",
+  "КРД Российская": "крд розница",
+  "Калининград Портовая": "клд розница",
+  "Калининград Яблочная": "клд розница",
+  "Калининград Ялтинская": "клд розница",
+  "Продавец Магазина КЛД Первомайская Розница ( ОФИС)": "клд розница",
+  "Старший Мастер КЛД Первомайская": "клд розница",
+  "Артём Шедловский": "алм розница",
+  "Александр Алейс": "алм розница",
+  "Алексей Исаев": "алм розница",
+  "Дмитрий Петухов": "аст розница"
+};
+
 const KZT_FUNNEL_NAMES = [
   "КЗ опт развитие",
   "КЗ возврат надлеж качество",
@@ -726,7 +750,7 @@ async function initConnection() {
       bx24('crm.category.list', { entityTypeId: 2 })
     ]);
 
-    users = (usersResult.result || []).map(u => ({
+    let allUsers = (usersResult.result || []).map(u => ({
       ID: u.ID,
       name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
     }));
@@ -735,12 +759,22 @@ async function initConnection() {
       let ns = usersResult.next;
       while (ns) {
         const more = await bx24('user.get', { ACTIVE: 'true', start: ns });
-        users = users.concat((more.result || []).map(u => ({
+        allUsers = allUsers.concat((more.result || []).map(u => ({
           ID: u.ID,
           name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
         })));
         ns = more.next || null;
       }
+    }
+
+    const allowedUserNames = Object.keys(RETAIL_EMPLOYEES_MAP);
+    users = allUsers.filter(u => allowedUserNames.includes(u.name));
+
+    if (users.length === 0) {
+      status.innerHTML = `<span class="status-badge disconnected"><span class="dot"></span>Нет сотрудников для розницы</span>`;
+      btn.textContent = 'Подключить';
+      btn.disabled = false;
+      return;
     }
 
     users.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
@@ -808,7 +842,29 @@ async function loadData() {
     
     const selUsers = userId === 'all' ? [] : userId.split(',');
     const selCats = categoryId === 'all' ? [] : categoryId.split(',');
-    const targetUsers = selUsers.length === 0 ? users : users.filter(u => selUsers.includes(String(u.ID)));
+    
+    let activeFunnelsLower = [];
+    if (selCats.length === 0) {
+      activeFunnelsLower = categories.map(c => c.name.toLowerCase());
+    } else {
+      activeFunnelsLower = categories.filter(c => selCats.includes(c.id)).map(c => c.name.toLowerCase());
+    }
+
+    let baseUsersByFunnel = users.filter(u => {
+      const funnel = RETAIL_EMPLOYEES_MAP[u.name];
+      return funnel && activeFunnelsLower.includes(funnel);
+    });
+
+    let targetUsers = baseUsersByFunnel;
+    if (selUsers.length > 0) {
+      targetUsers = baseUsersByFunnel.filter(u => selUsers.includes(String(u.ID)));
+    }
+
+    if (targetUsers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="state-message" style="color:var(--text-secondary)">Нет ответственных для данных воронок</div></td></tr>`;
+      btn.disabled = false; btn.textContent = 'Загрузить';
+      return;
+    }
 
     let results;
     if (currentAnalysisTab === 'cohort') {
@@ -858,11 +914,11 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
   const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
   const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
   
-  const targetUserIds = targetUsers.map(u => u.ID);
+  const targetUserIds = targetUsers.map(u => String(u.ID));
 
   updateProgress('Загрузка когорты лидов...');
   const leadFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo };
-  if (selUsers.length > 0) Object.assign(leadFilter, { 'ASSIGNED_BY_ID': selUsers }); // Use assign to avoid invalid bitrix arrays sometimes if selUsers is 1 element. Wait, rest api supports arrays.
+  if (targetUserIds.length > 0) Object.assign(leadFilter, { 'ASSIGNED_BY_ID': targetUserIds }); 
 
   const allLeads = await bx24FetchAll('crm.lead.list', {
     filter: leadFilter,
@@ -873,7 +929,7 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
 
   updateProgress('Загрузка связанных сделок...');
   const dealFilter = { '>=DATE_CREATE': dateFrom };
-  if (selUsers.length > 0) dealFilter.ASSIGNED_BY_ID = selUsers;
+  if (targetUserIds.length > 0) dealFilter.ASSIGNED_BY_ID = targetUserIds;
   if (selCats.length > 0) dealFilter.CATEGORY_ID = selCats.length === 1 ? selCats[0] : selCats;
   
   const allDeals = await bx24FetchAll('crm.deal.list', {
