@@ -744,7 +744,19 @@ async function initConnection() {
     }
 
     users.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-    categories = (catResult.result?.categories || []).map(c => ({ id: String(c.id), name: c.name }));
+
+    const allowedFunnelsLower = [
+      'екб розница',
+      'крд розница',
+      'клд розница',
+      'мск розница',
+      'алм розница',
+      'аст розница'
+    ];
+
+    categories = (catResult.result?.categories || [])
+      .map(c => ({ id: String(c.id), name: c.name }))
+      .filter(c => allowedFunnelsLower.includes(c.name.toLowerCase()));
 
     // Populate searchable combo boxes
     const userOptions = [{ value: 'all', label: 'Все сотрудники' }, ...users.map(u => ({ value: u.ID, label: u.name }))];
