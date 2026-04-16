@@ -61,6 +61,16 @@
     }
     .card:hover { box-shadow: var(--shadow); }
 
+    /* ─── Tabs ─── */
+    .tabs { display:flex; justify-content:center; gap:8px; margin-bottom: 24px; }
+    .tab-btn {
+      padding: 10px 18px; font-size: 14px; font-weight: 600; font-family: inherit;
+      background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border);
+      border-radius: 20px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm);
+    }
+    .tab-btn:hover { background: var(--bg-secondary); }
+    .tab-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+
     /* ─── Settings ─── */
     .settings-bar {
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -381,6 +391,12 @@
       <p>Битрикс24 CRM — лиды, сделки, выручка в разрезе ответственных</p>
     </div>
 
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabClassic" onclick="switchTab('classic')">Классическая воронка</button>
+      <button class="tab-btn" id="tabCohort" onclick="switchTab('cohort')">Когортный анализ</button>
+    </div>
+
     <!-- Webhook Settings (скрыто для безопасности) -->
     <div class="card" style="display:none;">
       <div class="settings-bar">
@@ -569,6 +585,17 @@ let users = [];
 let categories = [];
 let currentSort = { key: 'revenue', dir: 'desc' };
 let lastResults = [];
+let currentAnalysisTab = 'classic';
+
+function switchTab(tab) {
+  currentAnalysisTab = tab;
+  document.getElementById('tabClassic').classList.toggle('active', tab === 'classic');
+  document.getElementById('tabCohort').classList.toggle('active', tab === 'cohort');
+  
+  if (document.getElementById('kpiGrid').style.display !== 'none') {
+    loadData();
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // INIT
@@ -772,10 +799,14 @@ async function loadData() {
     const targetUsers = selUsers.length === 0 ? users : users.filter(u => selUsers.includes(String(u.ID)));
 
     let results;
-    if (targetUsers.length <= 3) {
-      results = await loadSingleUsers(targetUsers, dateFrom, dateToStr, selCats);
+    if (currentAnalysisTab === 'cohort') {
+      results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
     } else {
-      results = await loadBatchUsers(targetUsers, dateFrom, dateToStr, selCats);
+      if (targetUsers.length <= 3) {
+        results = await loadSingleUsers(targetUsers, dateFrom, dateToStr, selCats);
+      } else {
+        results = await loadBatchUsers(targetUsers, dateFrom, dateToStr, selCats);
+      }
     }
 
     if (selUsers.length === 0) {
@@ -809,6 +840,91 @@ async function loadData() {
     console.error(err);
   }
   btn.disabled = false; btn.textContent = 'Загрузить';
+}
+
+async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) {
+  const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
+  const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
+  
+  const targetUserIds = targetUsers.map(u => u.ID);
+
+  updateProgress('Загрузка когорты лидов...');
+  const leadFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo };
+  if (selUsers.length > 0) Object.assign(leadFilter, { 'ASSIGNED_BY_ID': selUsers }); // Use assign to avoid invalid bitrix arrays sometimes if selUsers is 1 element. Wait, rest api supports arrays.
+
+  const allLeads = await bx24FetchAll('crm.lead.list', {
+    filter: leadFilter,
+    select: ['ID', 'ASSIGNED_BY_ID']
+  });
+  
+  const cohortLeadIds = new Set(allLeads.map(l => String(l.ID)));
+
+  updateProgress('Загрузка связанных сделок...');
+  const dealFilter = { '>=DATE_CREATE': dateFrom };
+  if (selUsers.length > 0) dealFilter.ASSIGNED_BY_ID = selUsers;
+  if (selCats.length > 0) dealFilter.CATEGORY_ID = selCats.length === 1 ? selCats[0] : selCats;
+  
+  const allDeals = await bx24FetchAll('crm.deal.list', {
+    filter: dealFilter,
+    select: ['ID', 'ASSIGNED_BY_ID', 'LEAD_ID', 'STAGE_SEMANTIC_ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE', 'DATE_CREATE']
+  }, (loaded, total) => updateProgress(`Сделки: ${loaded}/${total}`));
+
+  // Фильтруем сделки: либо из когорты лидов, либо созданные напрямую в этот же период без лида
+  const dbDateFrom = dateFrom.split('T')[0];
+  const dbDateToLimit = dateTo.split('T')[0];
+  
+  const cohortDeals = allDeals.filter(d => {
+    if (d.LEAD_ID && cohortLeadIds.has(String(d.LEAD_ID))) return true;
+    if (!d.LEAD_ID) {
+      const dDateStr = (d.DATE_CREATE || '').split('T')[0];
+      if (dDateStr >= dbDateFrom && dDateStr < dbDateToLimit) return true;
+    }
+    return false;
+  });
+
+  const kztDates = new Set();
+  cohortDeals.forEach(d => {
+    if (d.STAGE_SEMANTIC_ID === 'S' && kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+        kztDates.add(d.CLOSEDATE.split('T')[0]);
+    }
+  });
+
+  if (kztDates.size > 0) {
+    updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
+    await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
+  }
+
+  // Сбор статистики по юзерам
+  const stats = {};
+  targetUsers.forEach(u => {
+    stats[u.ID] = { leads: 0, deals: 0, wonCount: 0, revenue: 0 };
+  });
+
+  allLeads.forEach(l => {
+    if (stats[l.ASSIGNED_BY_ID]) stats[l.ASSIGNED_BY_ID].leads++;
+  });
+
+  for (const d of cohortDeals) {
+    const s = stats[d.ASSIGNED_BY_ID];
+    if (!s) continue;
+    s.deals++;
+    if (d.STAGE_SEMANTIC_ID === 'S') {
+       s.wonCount++;
+       let val = parseFloat(d.OPPORTUNITY || 0);
+       if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+          val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
+       }
+       s.revenue += val;
+    }
+  }
+
+  return targetUsers.map(u => ({
+    id: u.ID, name: u.name,
+    leads: stats[u.ID].leads,
+    deals: stats[u.ID].deals,
+    wonCount: stats[u.ID].wonCount,
+    revenue: stats[u.ID].revenue
+  }));
 }
 
 async function loadSingleUsers(targetUsers, dateFrom, dateTo, selCats) {
