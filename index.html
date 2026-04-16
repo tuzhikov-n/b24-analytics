@@ -64,16 +64,6 @@
     }
     .card:hover { box-shadow: var(--shadow); }
 
-    /* ─── Tabs ─── */
-    .tabs { display:flex; justify-content:center; gap:8px; margin-bottom: 24px; }
-    .tab-btn {
-      padding: 10px 18px; font-size: 14px; font-weight: 600; font-family: inherit;
-      background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border);
-      border-radius: 20px; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm);
-    }
-    .tab-btn:hover { background: var(--bg-secondary); }
-    .tab-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
-
     /* ─── Settings ─── */
     .settings-bar {
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -115,48 +105,38 @@
     .status-badge.connected .dot { background: var(--green); }
     .status-badge.disconnected .dot { background: var(--red); }
 
-    /* ─── Filters Grid ─── */
-    .filters-grid {
-      display: grid;
-      /* Dates and Presets take natural width, Dropdowns take remaining space evenly */
-      grid-template-columns: auto auto 1fr 1fr auto;
-      gap: 16px;
+    /* ─── Filters ─── */
+    .filters-row {
+      display: flex;
+      gap: 12px;
       align-items: end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
-    .fg-dates { grid-column: 1; grid-row: 1; }
-    .fg-presets { grid-column: 2; grid-row: 1; }
-    .fg-user { grid-column: 3; grid-row: 1; }
-    .fg-category { grid-column: 4; grid-row: 1; }
-    .fg-load { grid-column: 5; grid-row: 1; display: flex; align-items: flex-end; }
+    .filters-row:last-child { margin-bottom: 0; }
 
     .filter-group { display: flex; flex-direction: column; gap: 5px; }
     .filter-group label {
       font-size: 11px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .radio-label {
-      display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-    }
-    .radio-label input[type="radio"] {
-      margin: 0; width: 14px; height: 14px; cursor: pointer;
-      accent-color: var(--accent);
-    }
-    .filter-group input[type="date"] {
-      padding: 0 10px; font-size: 13px; font-family: inherit;
+
+    /* ─── Date Range Input ─── */
+    .date-range-input {
+      width: 240px; height: 42px; padding: 0 14px;
+      font-size: 13px; font-family: inherit;
       background: var(--bg-input); color: var(--text-primary);
       border: 1px solid var(--border); border-radius: var(--radius-sm);
-      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-      height: 42px; width: 130px;
+      outline: none; cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-sizing: border-box;
     }
-    .filter-group input[type="date"]:focus:not(:disabled) {
+    .date-range-input:focus {
       border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
-    }
-    .filter-group input[type="date"]:disabled {
-      opacity: 0.6; cursor: not-allowed; background: #f2f2f7;
     }
 
     /* ─── Quick Period ─── */
-    .period-presets { display: flex; gap: 4px; flex-wrap: nowrap; width: 100%; }
+    .period-presets { display: flex; gap: 4px; flex-wrap: nowrap; }
     .period-presets button {
       padding: 0 12px; font-size: 13px; font-weight: 500; height: 42px; flex: none;
       background: var(--bg-input); color: var(--text-secondary);
@@ -179,6 +159,7 @@
       border: 1px solid var(--border); border-radius: var(--radius-sm);
       outline: none; transition: border-color 0.2s, box-shadow 0.2s;
       cursor: pointer; text-overflow: ellipsis;
+      box-sizing: border-box;
     }
     .combo-input:focus {
       border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
@@ -353,29 +334,15 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
     /* ─── Responsive ─── */
-    @media (max-width: 1100px) {
-      .filters-grid {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto auto;
-      }
-      .fg-dates { grid-column: 1; grid-row: 1; }
-      .fg-presets { grid-column: 2; grid-row: 1; }
-      .fg-user { grid-column: 1; grid-row: 2; }
-      .fg-category { grid-column: 2; grid-row: 2; }
-      .fg-load { grid-column: 1 / -1; grid-row: 3; justify-content: stretch; }
-      .fg-load .btn { width: 100%; }
-    }
     @media (max-width: 900px) {
       .kpi-grid { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 768px) {
       .app { padding: 16px 12px 60px; }
-      .filters-grid { grid-template-columns: 1fr; }
-      .fg-dates { grid-column: 1; grid-row: auto; }
-      .fg-presets { grid-column: 1; grid-row: auto; }
-      .fg-user { grid-column: 1; grid-row: auto; }
-      .fg-category { grid-column: 1; grid-row: auto; }
-      .fg-load { grid-column: 1; grid-row: auto; }
+      .filters-row { flex-direction: column; }
+      .filter-group { width: 100%; }
+      .date-range-input { width: 100%; }
+      .period-presets { flex-wrap: wrap; }
       .combo-box { min-width: unset; width: 100%; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
       .settings-bar { flex-direction: column; align-items: stretch; }
@@ -406,35 +373,26 @@
 
     <!-- Filters -->
     <div class="card" id="filtersPanel" style="display:none;">
-      <div class="filters-grid">
-        <!-- Row 1: Dates -->
-        <!-- Row 1: Dates -->
-        <div class="fg-dates filter-group" style="flex:2;">
+      <!-- Row 1: Date picker + Quick presets -->
+      <div class="filters-row">
+        <div class="filter-group">
           <label>Период анализа</label>
-          <input type="text" id="dateRangePicker" class="b24-input" style="width: 100%; box-sizing: border-box; padding: 10px 14px; font-family: inherit; font-size: 13px; color: var(--text-primary); background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;" placeholder="Выберите даты">
+          <input type="text" id="dateRangePicker" class="date-range-input" placeholder="Выберите период" readonly>
         </div>
-        <!-- Row 1: Presets -->
-        <div class="fg-presets filter-group">
+        <div class="filter-group">
           <label>Быстрый выбор</label>
           <div class="period-presets" id="quickDates">
             <button onclick="setPeriod('today', this)">Сегодня</button>
             <button onclick="setPeriod('week', this)">Неделя</button>
-            <button onclick="setPeriod('month', this)">Месяц</button>
+            <button onclick="setPeriod('month', this)" class="active">Месяц</button>
             <button onclick="setPeriod('quarter', this)">Квартал</button>
             <button onclick="setPeriod('year', this)">Год</button>
           </div>
         </div>
-        <!-- Row 1: User -->
-        <div class="fg-user filter-group">
-          <label>Ответственный</label>
-          <div class="combo-box" id="userCombo" data-value="all">
-            <input class="combo-input" placeholder="Все сотрудники" value="Все сотрудники" autocomplete="off">
-            <svg class="combo-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
-            <div class="combo-dropdown"></div>
-          </div>
-        </div>
-        <!-- Row 2: Category -->
-        <div class="fg-category filter-group">
+      </div>
+      <!-- Row 2: Dropdowns + Load button -->
+      <div class="filters-row">
+        <div class="filter-group" style="flex:1;">
           <label>Воронка</label>
           <div class="combo-box" id="categoryCombo" data-value="all">
             <input class="combo-input" placeholder="Все воронки" value="Все воронки" autocomplete="off">
@@ -442,8 +400,15 @@
             <div class="combo-dropdown"></div>
           </div>
         </div>
-        <!-- Button -->
-        <div class="fg-load">
+        <div class="filter-group" style="flex:1;">
+          <label>Ответственный</label>
+          <div class="combo-box" id="userCombo" data-value="all">
+            <input class="combo-input" placeholder="Все сотрудники" value="Все сотрудники" autocomplete="off">
+            <svg class="combo-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+            <div class="combo-dropdown"></div>
+          </div>
+        </div>
+        <div class="filter-group" style="flex:0 0 auto; align-self: end;">
           <button class="btn btn-success" id="btnLoad" onclick="loadData()">Загрузить</button>
         </div>
       </div>
@@ -612,7 +577,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initDatepicker() {
-  // Инициализация календаря для периодов
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
   fpInstance = flatpickr("#dateRangePicker", {
     mode: "range",
     showMonths: window.innerWidth > 768 ? 2 : 1,
@@ -620,7 +587,7 @@ function initDatepicker() {
     dateFormat: "Y-m-d",
     altInput: true,
     altFormat: "d.m.Y",
-    defaultDate: [new Date(), new Date()],
+    defaultDate: [monthStart, now],
     onChange: function(selectedDates) {
       if (selectedDates.length === 2) {
         document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
@@ -763,11 +730,11 @@ async function initConnection() {
       .filter(c => allowedFunnelsLower.includes(c.name.toLowerCase()));
 
     // Populate searchable combo boxes
-    const userOptions = [{ value: 'all', label: 'Все сотрудники' }, ...users.map(u => ({ value: u.ID, label: u.name }))];
-    initComboBox('userCombo', userOptions, 'all');
-
     const catOptions = [{ value: 'all', label: 'Все воронки' }, ...categories.map(c => ({ value: c.id, label: c.name }))];
     initComboBox('categoryCombo', catOptions, 'all');
+
+    const userOptions = [{ value: 'all', label: 'Все сотрудники' }, ...users.map(u => ({ value: u.ID, label: u.name }))];
+    initComboBox('userCombo', userOptions, 'all');
 
     localStorage.setItem('b24_webhook', url);
     status.innerHTML = `<span class="status-badge connected"><span class="dot"></span>Подключено · ${users.length} сотрудников</span>`;
@@ -839,7 +806,7 @@ async function loadData() {
       return;
     }
 
-    const results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
+    let results = await loadCohortData(targetUsers, dateFrom, dateToStr, selCats, selUsers);
 
     if (selUsers.length === 0) {
       results = results.filter(r => r.leads > 0 || r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
@@ -1195,8 +1162,12 @@ function initComboBox(comboId, options, selectedValue) {
     }
     
     if (box._selected.size === options.length - 1) { // minus 'all' option
-      box._selected.clear();
-      box._selected.add('all');
+      const allNonAll = options.filter(o => String(o.value) !== 'all');
+      const allSelected = allNonAll.every(o => box._selected.has(String(o.value)));
+      if (allSelected) {
+        box._selected.clear();
+        box._selected.add('all');
+      }
     }
 
     updateInput();
@@ -1319,6 +1290,7 @@ window.syncUsersWithCategories = function() {
   if (userBox.updateSelection) {
     userBox.updateSelection(newSet);
   }
-};</script>
+};
+</script>
 </body>
 </html>
