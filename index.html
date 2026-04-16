@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сквозная аналитика по ответственным — Битрикс24</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --bg-card: #ffffff;
+      --bg-input: #f5f5f7;
+      --border: #e5e5ea;
+      --border-hover: #d1d1d6;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-muted: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --blue: #007aff;
+      --purple: #af52de;
+      --green: #34c759;
+      --amber: #ff9500;
+      --red: #ff3b30;
+      --teal: #5ac8fa;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* ─── Header ─── */
+    .header { margin-bottom: 28px; text-align: center; }
+    .header h1 {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+    .header p { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--bg-card); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 20px 24px;
+      margin-bottom: 16px; transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: var(--shadow); }
+
+    /* ─── Settings ─── */
+    .settings-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .settings-bar label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .settings-bar input[type="text"] {
+      flex: 1; min-width: 280px; padding: 10px 14px; font-size: 13px;
+      font-family: inherit; background: var(--bg-input); color: var(--text-primary);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .settings-bar input[type="text"]:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+    }
+
+    .btn {
+      padding: 10px 22px; font-size: 13px; font-weight: 600; font-family: inherit;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-success { background: var(--green); color: #fff; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 700; }
+    .btn-success:hover { background: #2db84e; }
+    .btn-success:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── Status ─── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    }
+    .status-badge.connected { background: rgba(52,199,89,0.1); color: #248a3d; }
+    .status-badge.disconnected { background: rgba(255,59,48,0.1); color: var(--red); }
+    .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .status-badge.connected .dot { background: var(--green); }
+    .status-badge.disconnected .dot { background: var(--red); }
+
+    /* ─── Filters Grid ─── */
+    .filters-grid {
+      display: grid;
+      /* Dates and Presets take natural width, Dropdowns take remaining space evenly */
+      grid-template-columns: auto auto 1fr 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+    .fg-dates { grid-column: 1; grid-row: 1; }
+    .fg-presets { grid-column: 2; grid-row: 1; }
+    .fg-user { grid-column: 3; grid-row: 1; }
+    .fg-category { grid-column: 4; grid-row: 1; }
+    .fg-load { grid-column: 5; grid-row: 1; display: flex; align-items: flex-end; }
+
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .radio-label {
+      display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+    .radio-label input[type="radio"] {
+      margin: 0; width: 14px; height: 14px; cursor: pointer;
+      accent-color: var(--accent);
+    }
+    .filter-group input[type="date"] {
+      padding: 0 10px; font-size: 13px; font-family: inherit;
+      background: var(--bg-input); color: var(--text-primary);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      height: 42px; width: 130px;
+    }
+    .filter-group input[type="date"]:focus:not(:disabled) {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+    }
+    .filter-group input[type="date"]:disabled {
+      opacity: 0.6; cursor: not-allowed; background: #f2f2f7;
+    }
+
+    /* ─── Quick Period ─── */
+    .period-presets { display: flex; gap: 4px; flex-wrap: nowrap; width: 100%; }
+    .period-presets button {
+      padding: 0 12px; font-size: 13px; font-weight: 500; height: 42px; flex: none;
+      background: var(--bg-input); color: var(--text-secondary);
+      border: 1px solid var(--border); border-radius: 20px; cursor: pointer;
+      transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center;
+      white-space: nowrap;
+    }
+    .period-presets button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .period-presets button:hover { background: #eee; color: var(--text-primary); }
+    .period-presets button.active {
+      background: var(--text-primary); color: #fff; border-color: var(--text-primary);
+    }
+
+    /* ─── Combo Box (Searchable Select) ─── */
+    .combo-box { position: relative; min-width: 150px; width: 100%; }
+    .combo-input {
+      width: 100%; height: 42px; padding: 0 28px 0 12px; text-overflow: ellipsis;
+      font-size: 13px; font-family: inherit;
+      background: var(--bg-input); color: var(--text-primary);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer; text-overflow: ellipsis;
+    }
+    .combo-input:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+      cursor: text;
+    }
+    .combo-chevron {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; pointer-events: none;
+      color: var(--text-muted); transition: transform 0.2s;
+    }
+    .combo-box.open .combo-chevron { transform: translateY(-50%) rotate(180deg); }
+    .combo-dropdown {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+      max-height: 240px; overflow-y: auto; z-index: 100;
+      padding: 4px;
+    }
+    .combo-box.open .combo-dropdown { display: block; }
+    .combo-option {
+      padding: 9px 12px; font-size: 13px; border-radius: 8px;
+      cursor: pointer; transition: background 0.1s; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .combo-option:hover, .combo-option.highlighted { background: rgba(0,113,227,0.08); }
+    .combo-option.selected { font-weight: 600; color: var(--accent); }
+    .combo-empty {
+      padding: 12px; font-size: 12px; color: var(--text-muted); text-align: center;
+    }
+
+    /* ─── KPI Cards ─── */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 12px; margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--bg-card); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 20px;
+      text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .kpi-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .kpi-card.leads .kpi-icon { background: rgba(0,122,255,0.1); color: var(--blue); }
+    .kpi-card.deals .kpi-icon { background: rgba(175,82,222,0.1); color: var(--purple); }
+    .kpi-card.won .kpi-icon { background: rgba(52,199,89,0.1); color: var(--green); }
+    .kpi-card.revenue .kpi-icon { background: rgba(255,149,0,0.1); color: var(--amber); }
+    .kpi-card.conversion .kpi-icon { background: rgba(255,59,48,0.1); color: var(--red); }
+    .kpi-icon svg { width: 20px; height: 20px; }
+    .kpi-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+    .kpi-value { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary); }
+    .kpi-card.revenue .kpi-value { font-size: 22px; }
+
+    /* ─── Funnel ─── */
+    .funnel-section {
+      background: var(--bg-card); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); padding: 32px;
+      margin-bottom: 16px; overflow: hidden;
+    }
+    .funnel-title {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 28px; text-align: center;
+    }
+    .funnel {
+      max-width: 620px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .funnel-stage {
+      width: 100%;
+    }
+    .funnel-bar {
+      height: 54px; border-radius: 14px; display: flex;
+      align-items: center; justify-content: center; gap: 10px;
+      color: #fff; transition: transform 0.2s, filter 0.15s; cursor: default;
+      margin: 0 auto; overflow: hidden; white-space: nowrap;
+      max-width: 100%; box-sizing: border-box;
+    }
+    .funnel-bar:hover { transform: scale(1.015); filter: brightness(1.06); }
+    .fb-0 { background: linear-gradient(135deg, #007aff, #5ac8fa); width: 100%; }
+    .fb-1 { background: linear-gradient(135deg, #af52de, #da8fff); width: 80%; }
+    .fb-2 { background: linear-gradient(135deg, #34c759, #6ee08a); width: 62%; }
+    .fb-3 { background: linear-gradient(135deg, #ff9500, #ffb340); width: 46%; }
+    .funnel-bar .fv { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+    .funnel-bar .fl { font-size: 13px; font-weight: 500; opacity: 0.88; }
+    .funnel-gap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 6px 0; color: var(--text-muted);
+    }
+    .funnel-gap svg { width: 14px; height: 14px; opacity: 0.35; }
+    .fg-badge {
+      background: var(--bg-secondary); padding: 2px 10px; border-radius: 10px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+    }
+    .funnel-revenue {
+      margin-top: 24px; padding-top: 24px;
+      border-top: 1px dashed var(--border);
+      text-align: center; width: 100%;
+    }
+    .funnel-revenue-inner {
+      display: inline-flex; align-items: baseline; justify-content: center;
+      gap: 12px; padding: 16px 32px;
+      background: linear-gradient(135deg, rgba(255,149,0,0.1), rgba(255,179,64,0.1));
+      border: 1px solid rgba(255,149,0,0.2); border-radius: 16px;
+      color: var(--amber); transition: transform 0.2s; cursor: default;
+    }
+    .funnel-revenue-inner:hover { transform: scale(1.02); }
+    .funnel-revenue-inner .rev-label { font-size: 15px; font-weight: 600; opacity: 0.9; }
+    .funnel-revenue-inner .rev-val { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+
+    /* ─── Table ─── */
+    .table-section {
+      background: var(--bg-card); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+    }
+    .table-header {
+      padding: 18px 24px; display: flex; align-items: center;
+      justify-content: space-between; border-bottom: 1px solid var(--border);
+    }
+    .table-header h2 { font-size: 15px; font-weight: 700; }
+    .table-header span { font-size: 12px; color: var(--text-muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      padding: 12px 16px; text-align: center;
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+      transition: color 0.15s;
+    }
+    thead th:nth-child(2) { text-align: left; }
+    thead th:hover { color: var(--text-primary); }
+    thead th.sorted { color: var(--accent); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(0,122,255,0.03); }
+    tbody td {
+      padding: 14px 16px; white-space: nowrap;
+      text-align: center; font-variant-numeric: tabular-nums;
+    }
+    tbody td:nth-child(2) { text-align: left; }
+    td.name-cell { font-weight: 600; color: var(--text-primary); }
+    td.num { font-weight: 500; }
+    td.highlight-blue { color: var(--blue); font-weight: 600; }
+    td.highlight-green { color: #248a3d; font-weight: 600; }
+    td.highlight-amber { color: #c77800; font-weight: 700; }
+    td.rank {
+      width: 40px; font-weight: 700; font-size: 13px; color: var(--text-muted);
+    }
+    td.rank.top-1 { color: var(--amber); }
+    td.rank.top-2 { color: #8e8e93; }
+    td.rank.top-3 { color: #c77800; }
+
+    /* ─── States ─── */
+    .state-message {
+      padding: 60px 20px; text-align: center;
+      color: var(--text-muted); font-size: 14px;
+    }
+    .spinner {
+      width: 28px; height: 28px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-text { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 6px; }
+
+    /* ─── Animations ─── */
+    .fade-in { animation: fadeIn 0.35s ease-out both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1100px) {
+      .filters-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+      }
+      .fg-dates { grid-column: 1; grid-row: 1; }
+      .fg-presets { grid-column: 2; grid-row: 1; }
+      .fg-user { grid-column: 1; grid-row: 2; }
+      .fg-category { grid-column: 2; grid-row: 2; }
+      .fg-load { grid-column: 1 / -1; grid-row: 3; justify-content: stretch; }
+      .fg-load .btn { width: 100%; }
+    }
+    @media (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .app { padding: 16px 12px 60px; }
+      .filters-grid { grid-template-columns: 1fr; }
+      .fg-dates { grid-column: 1; grid-row: auto; }
+      .fg-presets { grid-column: 1; grid-row: auto; }
+      .fg-user { grid-column: 1; grid-row: auto; }
+      .fg-category { grid-column: 1; grid-row: auto; }
+      .fg-load { grid-column: 1; grid-row: auto; }
+      .combo-box { min-width: unset; width: 100%; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .settings-bar { flex-direction: column; align-items: stretch; }
+      .settings-bar input[type="text"] { min-width: unset; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <h1>Сквозная аналитика</h1>
+      <p>Битрикс24 CRM — лиды, сделки, выручка в разрезе ответственных</p>
+    </div>
+
+    <!-- Webhook Settings -->
+    <div class="card">
+      <div class="settings-bar">
+        <label>Вебхук</label>
+        <input type="text" id="webhookUrl" placeholder="https://your-domain.bitrix24.ru/rest/ID/KEY/">
+        <div id="connectionStatus"></div>
+        <button class="btn btn-primary" id="btnConnect" onclick="initConnection()">Подключить</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card" id="filtersPanel" style="display:none;">
+      <div class="filters-grid">
+        <!-- Row 1: Dates -->
+        <!-- Row 1: Dates -->
+        <div class="fg-dates filter-group">
+          <label class="radio-label">
+            <input type="radio" name="periodMode" value="custom" id="modeCustom" checked onchange="togglePeriodMode()"> Произвольный период
+          </label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="date" id="dateFrom" onchange="document.getElementById('modeCustom').checked=true; togglePeriodMode()">
+            <span style="color:var(--text-muted);font-weight:600">—</span>
+            <input type="date" id="dateTo" onchange="document.getElementById('modeCustom').checked=true; togglePeriodMode()">
+          </div>
+        </div>
+        <!-- Row 1: Presets -->
+        <div class="fg-presets filter-group">
+          <label class="radio-label">
+            <input type="radio" name="periodMode" value="preset" id="modePreset" onchange="togglePeriodMode()"> Быстрый выбор
+          </label>
+          <div class="period-presets" id="quickDates">
+            <button onclick="setPeriod('today', this)">Сегодня</button>
+            <button onclick="setPeriod('week', this)">Неделя</button>
+            <button onclick="setPeriod('month', this)">Месяц</button>
+            <button onclick="setPeriod('quarter', this)">Квартал</button>
+            <button onclick="setPeriod('year', this)">Год</button>
+          </div>
+        </div>
+        <!-- Row 1: User -->
+        <div class="fg-user filter-group">
+          <label>Ответственный</label>
+          <div class="combo-box" id="userCombo" data-value="all">
+            <input class="combo-input" placeholder="Все сотрудники" value="Все сотрудники" autocomplete="off">
+            <svg class="combo-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+            <div class="combo-dropdown"></div>
+          </div>
+        </div>
+        <!-- Row 2: Category -->
+        <div class="fg-category filter-group">
+          <label>Воронка</label>
+          <div class="combo-box" id="categoryCombo" data-value="all">
+            <input class="combo-input" placeholder="Все воронки" value="Все воронки" autocomplete="off">
+            <svg class="combo-chevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+            <div class="combo-dropdown"></div>
+          </div>
+        </div>
+        <!-- Button -->
+        <div class="fg-load">
+          <button class="btn btn-success" id="btnLoad" onclick="loadData()">Загрузить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid" style="display:none;">
+      <div class="kpi-card leads fade-in">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        <div class="kpi-label">Лиды</div>
+        <div class="kpi-value" id="kpiLeads">—</div>
+      </div>
+      <div class="kpi-card deals fade-in" style="animation-delay:.04s">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg></div>
+        <div class="kpi-label">Сделки</div>
+        <div class="kpi-value" id="kpiDeals">—</div>
+      </div>
+      <div class="kpi-card won fade-in" style="animation-delay:.08s">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
+        <div class="kpi-label">Успешные сделки</div>
+        <div class="kpi-value" id="kpiWon">—</div>
+      </div>
+      <div class="kpi-card revenue fade-in" style="animation-delay:.12s">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div>
+        <div class="kpi-label">Выручка</div>
+        <div class="kpi-value" id="kpiRevenue">—</div>
+      </div>
+      <div class="kpi-card conversion fade-in" style="animation-delay:.16s">
+        <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg></div>
+        <div class="kpi-label">Конверсия</div>
+        <div class="kpi-value" id="kpiConversion">—</div>
+      </div>
+    </div>
+
+    <!-- Funnel -->
+    <div class="funnel-section" id="funnelSection" style="display:none;">
+      <div class="funnel-title">Воронка продаж</div>
+      <div class="funnel" id="funnelChart"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-section" id="tableSection" style="display:none;">
+      <div class="table-header">
+        <h2>Сравнение по ответственным</h2>
+        <span id="tableSubtitle"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:44px">#</th>
+              <th data-sort="name">Ответственный</th>
+              <th data-sort="leads">Лиды</th>
+              <th data-sort="deals">Сделки</th>
+              <th data-sort="wonCount">Успешные</th>
+              <th data-sort="conversion">Конверсия</th>
+              <th data-sort="revenue" class="sorted">Выручка ▼</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_WEBHOOK = 'https://tstarter.bitrix24.ru/rest/19294/sf99bv6v2j28o0jg/';
+
+const KZT_FUNNEL_NAMES = [
+  "КЗ опт развитие",
+  "КЗ возврат надлеж качество",
+  "КЗ возврат по гарантии",
+  "АЛМ розница",
+  "АСТ розница"
+];
+let rateCache = new Map();
+
+async function getKztToRubRate(dateStr) {
+  if (!dateStr) return 0.2;
+  const dateOnly = dateStr.split('T')[0];
+  
+  if (rateCache.has(dateOnly)) {
+    return await rateCache.get(dateOnly);
+  }
+
+  const promise = (async () => {
+    let currentD = new Date(dateOnly);
+    for (let attempt = 0; attempt < 7; attempt++) {
+      const yyyy = currentD.getFullYear();
+      const mm = String(currentD.getMonth() + 1).padStart(2, '0');
+      const dd = String(currentD.getDate()).padStart(2, '0');
+      const cacheKey = `${yyyy}-${mm}-${dd}`;
+      
+      if (rateCache.has(cacheKey) && typeof rateCache.get(cacheKey) === 'number') {
+        return rateCache.get(cacheKey);
+      }
+      
+      try {
+        const url = `https://www.cbr-xml-daily.ru/archive/${yyyy}/${mm}/${dd}/daily_json.js`;
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data?.Valute?.KZT) {
+            const rate = data.Valute.KZT.Value / data.Valute.KZT.Nominal;
+            rateCache.set(cacheKey, rate);
+            return rate;
+          }
+        }
+      } catch (e) {
+        console.warn("CBR rate fetch fallback", cacheKey);
+      }
+      currentD.setDate(currentD.getDate() - 1);
+    }
+    return 0.2;
+  })();
+
+  rateCache.set(dateOnly, promise);
+  const finalRate = await promise;
+  rateCache.set(dateOnly, finalRate);
+  return finalRate;
+}
+
+let WEBHOOK_URL = '';
+let users = [];
+let categories = [];
+let currentSort = { key: 'revenue', dir: 'desc' };
+let lastResults = [];
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('b24_webhook') || DEFAULT_WEBHOOK;
+  document.getElementById('webhookUrl').value = saved;
+  setDefaultDates();
+  setupSorting();
+  if (saved) initConnection();
+});
+
+function togglePeriodMode() {
+  const isCustom = document.getElementById('modeCustom').checked;
+  document.getElementById('dateFrom').disabled = !isCustom;
+  document.getElementById('dateTo').disabled = !isCustom;
+  
+  const presets = document.querySelectorAll('#quickDates button');
+  presets.forEach(btn => btn.disabled = isCustom);
+
+  if (!isCustom) {
+    if (!document.querySelector('#quickDates button.active')) {
+      const el = document.querySelector('#quickDates button:nth-child(3)');
+      if (el) setPeriod('month', el);
+    }
+  } else {
+    presets.forEach(btn => btn.classList.remove('active'));
+  }
+}
+
+function setDefaultDates() {
+  const now = new Date();
+  document.getElementById('dateFrom').value = formatDate(now);
+  document.getElementById('dateTo').value = formatDate(now);
+  
+  document.getElementById('modeCustom').checked = true;
+  togglePeriodMode();
+}
+
+function formatDate(d) { return d.toISOString().split('T')[0]; }
+
+function setPeriod(type, el) {
+  const now = new Date();
+  let from;
+  switch (type) {
+    case 'today': from = new Date(now); break;
+    case 'week':
+      from = new Date(now);
+      from.setDate(from.getDate() - ((from.getDay() + 6) % 7));
+      break;
+    case 'month': from = new Date(now.getFullYear(), now.getMonth(), 1); break;
+    case 'quarter':
+      from = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+      break;
+    case 'year': from = new Date(now.getFullYear(), 0, 1); break;
+  }
+  document.getElementById('dateFrom').value = formatDate(from);
+  document.getElementById('dateTo').value = formatDate(now);
+  
+  if (el) {
+    document.getElementById('modePreset').checked = true;
+    togglePeriodMode();
+    document.querySelectorAll('.period-presets button').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════
+async function bx24(method, params = {}) {
+  const body = new URLSearchParams();
+  flattenParams(params, '', body);
+  const resp = await fetch(WEBHOOK_URL + method, { method: 'POST', body });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
+}
+
+function flattenParams(obj, prefix, out) {
+  for (const [key, val] of Object.entries(obj)) {
+    const fk = prefix ? `${prefix}[${key}]` : key;
+    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+      flattenParams(val, fk, out);
+    } else if (Array.isArray(val)) {
+      val.forEach((item, i) => out.append(`${fk}[${i}]`, item));
+    } else {
+      out.append(fk, val);
+    }
+  }
+}
+
+async function bx24Batch(commands) {
+  const body = new URLSearchParams();
+  body.append('halt', '0');
+  for (const [key, cmd] of Object.entries(commands)) body.append(`cmd[${key}]`, cmd);
+  const resp = await fetch(WEBHOOK_URL + 'batch', { method: 'POST', body });
+  if (!resp.ok) throw new Error(`Batch HTTP ${resp.status}`);
+  return resp.json();
+}
+
+async function bx24FetchAll(method, params, progressCb) {
+  let items = [], start = 0;
+  while (true) {
+    const result = await bx24(method, { ...params, start });
+    items = items.concat(result.result || []);
+    if (progressCb) progressCb(items.length, result.total || items.length);
+    if (result.next) { start = result.next; } else break;
+  }
+  return items;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONNECTION
+// ═══════════════════════════════════════════════════════════
+async function initConnection() {
+  let url = document.getElementById('webhookUrl').value.trim();
+  if (!url.endsWith('/')) url += '/';
+  WEBHOOK_URL = url;
+
+  const btn = document.getElementById('btnConnect');
+  const status = document.getElementById('connectionStatus');
+  btn.disabled = true; btn.textContent = 'Подключение...';
+  status.innerHTML = '';
+
+  try {
+    const [usersResult, catResult] = await Promise.all([
+      bx24('user.get', { ACTIVE: 'true' }),
+      bx24('crm.category.list', { entityTypeId: 2 })
+    ]);
+
+    users = (usersResult.result || []).map(u => ({
+      ID: u.ID,
+      name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
+    }));
+
+    if (usersResult.next) {
+      let ns = usersResult.next;
+      while (ns) {
+        const more = await bx24('user.get', { ACTIVE: 'true', start: ns });
+        users = users.concat((more.result || []).map(u => ({
+          ID: u.ID,
+          name: `${u.NAME || ''} ${u.LAST_NAME || ''}`.trim() || `User #${u.ID}`
+        })));
+        ns = more.next || null;
+      }
+    }
+
+    users.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+    categories = (catResult.result?.categories || []).map(c => ({ id: String(c.id), name: c.name }));
+
+    // Populate searchable combo boxes
+    const userOptions = [{ value: 'all', label: 'Все сотрудники' }, ...users.map(u => ({ value: u.ID, label: u.name }))];
+    initComboBox('userCombo', userOptions, 'all');
+
+    const catOptions = [{ value: 'all', label: 'Все воронки' }, ...categories.map(c => ({ value: c.id, label: c.name }))];
+    initComboBox('categoryCombo', catOptions, 'all');
+
+    localStorage.setItem('b24_webhook', url);
+    status.innerHTML = `<span class="status-badge connected"><span class="dot"></span>Подключено · ${users.length} сотрудников</span>`;
+    document.getElementById('filtersPanel').style.display = '';
+    btn.textContent = 'Переподключить';
+  } catch (err) {
+    status.innerHTML = `<span class="status-badge disconnected"><span class="dot"></span>Ошибка: ${err.message}</span>`;
+    btn.textContent = 'Подключить';
+  }
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════
+async function loadData() {
+  const dateFrom = document.getElementById('dateFrom').value;
+  const dateTo = document.getElementById('dateTo').value;
+  const userId = document.getElementById('userCombo').dataset.value;
+  const categoryId = document.getElementById('categoryCombo').dataset.value;
+  if (!dateFrom || !dateTo) { alert('Выберите период'); return; }
+
+  const btn = document.getElementById('btnLoad');
+  btn.disabled = true; btn.textContent = 'Загрузка...';
+
+  document.getElementById('kpiGrid').style.display = '';
+  document.getElementById('funnelSection').style.display = '';
+  document.getElementById('tableSection').style.display = '';
+
+  ['kpiLeads','kpiDeals','kpiWon','kpiRevenue','kpiConversion'].forEach(id => {
+    document.getElementById(id).textContent = '...';
+  });
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = `<tr><td colspan="7"><div class="state-message"><div class="spinner"></div>Загрузка данных...<p class="progress-text" id="progressText">Подготовка</p></div></td></tr>`;
+  document.getElementById('funnelChart').innerHTML = '<div class="state-message"><div class="spinner"></div></div>';
+
+  try {
+    const dateToNext = new Date(dateTo);
+    dateToNext.setDate(dateToNext.getDate() + 1);
+    const dateToStr = formatDate(dateToNext);
+    
+    const selUsers = userId === 'all' ? [] : userId.split(',');
+    const selCats = categoryId === 'all' ? [] : categoryId.split(',');
+    const targetUsers = selUsers.length === 0 ? users : users.filter(u => selUsers.includes(String(u.ID)));
+
+    let results;
+    if (targetUsers.length <= 3) {
+      results = await loadSingleUsers(targetUsers, dateFrom, dateToStr, selCats);
+    } else {
+      results = await loadBatchUsers(targetUsers, dateFrom, dateToStr, selCats);
+    }
+
+    if (selUsers.length === 0) {
+      if (selCats.length > 0) {
+        results = results.filter(r => r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
+      } else {
+        results = results.filter(r => r.leads > 0 || r.deals > 0 || r.wonCount > 0 || r.revenue > 0);
+      }
+    }
+    results.forEach(r => { r.conversion = r.deals > 0 ? (r.wonCount / r.deals * 100) : 0; });
+
+    lastResults = results;
+    sortResults();
+
+    const totals = results.reduce((a, r) => {
+      a.leads += r.leads; a.deals += r.deals;
+      a.wonCount += r.wonCount; a.revenue += r.revenue;
+      return a;
+    }, { leads: 0, deals: 0, wonCount: 0, revenue: 0 });
+
+    renderKPIs(totals);
+    renderFunnel(totals);
+    renderTable(results);
+
+    const d1 = new Date(dateFrom).toLocaleDateString('ru-RU');
+    const d2 = new Date(dateTo).toLocaleDateString('ru-RU');
+    document.getElementById('tableSubtitle').textContent =
+      `${d1} — ${d2} · ${results.length} сотрудников`;
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="state-message" style="color:var(--red)">Ошибка: ${err.message}</div></td></tr>`;
+    console.error(err);
+  }
+  btn.disabled = false; btn.textContent = 'Загрузить';
+}
+
+async function loadSingleUsers(targetUsers, dateFrom, dateTo, selCats) {
+  const results = [];
+  const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
+  const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
+
+  for (const user of targetUsers) {
+    updateProgress(`${user.name}...`);
+    const leadRes = await bx24('crm.lead.list', {
+      filter: { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, ASSIGNED_BY_ID: user.ID },
+      select: ['ID'], start: 0
+    });
+    const dealFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, ASSIGNED_BY_ID: user.ID };
+    if (selCats.length === 1) dealFilter.CATEGORY_ID = selCats[0];
+    else if (selCats.length > 1) dealFilter.CATEGORY_ID = selCats;
+    
+    const dealRes = await bx24('crm.deal.list', { filter: dealFilter, select: ['ID'], start: 0 });
+    const wonDeals = await bx24FetchAll('crm.deal.list', {
+      filter: { ...dealFilter, STAGE_SEMANTIC_ID: 'S' }, select: ['ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE']
+    });
+
+    const kztDates = new Set();
+    for (const d of wonDeals) {
+      if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+        kztDates.add(d.CLOSEDATE.split('T')[0]);
+      }
+    }
+    if (kztDates.size > 0) {
+      updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
+      await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
+    }
+
+    let revenue = 0;
+    for (const d of wonDeals) {
+      let val = parseFloat(d.OPPORTUNITY || 0);
+      if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+        val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
+      }
+      revenue += val;
+    }
+
+    results.push({
+      id: user.ID, name: user.name,
+      leads: leadRes.total || 0, deals: dealRes.total || 0,
+      wonCount: wonDeals.length,
+      revenue: revenue
+    });
+  }
+  return results;
+}
+
+async function loadBatchUsers(targetUsers, dateFrom, dateTo, selCats) {
+  updateProgress('Подсчёт лидов...');
+  const leadCmd = {}, dealCmd = {};
+  for (const user of targetUsers) {
+    const lp = new URLSearchParams();
+    lp.set('filter[>=DATE_CREATE]', dateFrom);
+    lp.set('filter[<DATE_CREATE]', dateTo);
+    lp.set('filter[ASSIGNED_BY_ID]', user.ID);
+    lp.set('select[0]', 'ID');
+    lp.set('start', '0');
+    leadCmd[`l${user.ID}`] = `crm.lead.list?${lp}`;
+
+    const dp = new URLSearchParams();
+    dp.set('filter[>=DATE_CREATE]', dateFrom);
+    dp.set('filter[<DATE_CREATE]', dateTo);
+    dp.set('filter[ASSIGNED_BY_ID]', user.ID);
+    if (selCats.length === 1) {
+      dp.set('filter[CATEGORY_ID]', selCats[0]);
+    } else if (selCats.length > 1) {
+      selCats.forEach((c, idx) => dp.append(`filter[CATEGORY_ID][${idx}]`, c));
+    }
+    dp.set('select[0]', 'ID');
+    dp.set('start', '0');
+    dealCmd[`d${user.ID}`] = `crm.deal.list?${dp}`;
+  }
+
+  const batchExec = async (cmds, label) => {
+    const entries = Object.entries(cmds);
+    const totals = {};
+    for (let i = 0; i < entries.length; i += 50) {
+      updateProgress(`${label} (${Math.min(i + 50, entries.length)}/${entries.length})...`);
+      const chunk = Object.fromEntries(entries.slice(i, i + 50));
+      const res = await bx24Batch(chunk);
+      if (res.result?.result_total) Object.assign(totals, res.result.result_total);
+    }
+    return totals;
+  };
+
+  const leadTotals = await batchExec(leadCmd, 'Лиды');
+  updateProgress('Подсчёт сделок...');
+  const dealTotals = await batchExec(dealCmd, 'Сделки');
+
+  updateProgress('Загрузка успешных сделок...');
+  const wonFilter = { '>=DATE_CREATE': dateFrom, '<DATE_CREATE': dateTo, STAGE_SEMANTIC_ID: 'S' };
+  if (selCats.length === 1) wonFilter.CATEGORY_ID = selCats[0];
+  else if (selCats.length > 1) wonFilter.CATEGORY_ID = selCats;
+  
+  const allWon = await bx24FetchAll('crm.deal.list', {
+    filter: wonFilter, select: ['ID', 'ASSIGNED_BY_ID', 'OPPORTUNITY', 'CATEGORY_ID', 'CLOSEDATE']
+  }, (loaded, total) => updateProgress(`Успешные сделки: ${loaded}/${total}`));
+
+  const kztNamesLower = KZT_FUNNEL_NAMES.map(n => n.toLowerCase());
+  const kztCategoryIds = categories.filter(c => kztNamesLower.includes(c.name.toLowerCase())).map(c => c.id);
+  const kztDates = new Set();
+  for (const d of allWon) {
+    if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+      kztDates.add(d.CLOSEDATE.split('T')[0]);
+    }
+  }
+  if (kztDates.size > 0) {
+    updateProgress(`Загрузка курсов валют (${kztDates.size} дней)...`);
+    await Promise.all([...kztDates].map(date => getKztToRubRate(date)));
+  }
+
+  const wonByUser = {};
+  for (const d of allWon) {
+    const uid = d.ASSIGNED_BY_ID;
+    if (!wonByUser[uid]) wonByUser[uid] = { count: 0, revenue: 0 };
+    wonByUser[uid].count++;
+    
+    let val = parseFloat(d.OPPORTUNITY || 0);
+    if (kztCategoryIds.includes(String(d.CATEGORY_ID)) && d.CLOSEDATE) {
+      val = val * (await getKztToRubRate(d.CLOSEDATE.split('T')[0]));
+    }
+    wonByUser[uid].revenue += val;
+  }
+
+  return targetUsers.map(u => ({
+    id: u.ID, name: u.name,
+    leads: leadTotals[`l${u.ID}`] || 0,
+    deals: dealTotals[`d${u.ID}`] || 0,
+    wonCount: wonByUser[u.ID]?.count || 0,
+    revenue: wonByUser[u.ID]?.revenue || 0
+  }));
+}
+
+function updateProgress(text) {
+  const el = document.getElementById('progressText');
+  if (el) el.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderKPIs(totals) {
+  const conv = totals.deals > 0 ? (totals.wonCount / totals.deals * 100) : 0;
+  animateNumber('kpiLeads', totals.leads);
+  animateNumber('kpiDeals', totals.deals);
+  animateNumber('kpiWon', totals.wonCount);
+  document.getElementById('kpiRevenue').textContent = formatMoney(totals.revenue);
+  document.getElementById('kpiConversion').textContent = conv.toFixed(1) + '%';
+}
+
+function renderFunnel(totals) {
+  const steps = [
+    { label: 'Лиды', value: totals.leads, idx: 0 },
+    { label: 'Сделки', value: totals.deals, idx: 1 },
+    { label: 'Успешные', value: totals.wonCount, idx: 2 }
+  ];
+
+  let maxVal = Math.max(totals.leads, totals.deals, totals.wonCount);
+  if (maxVal === 0) maxVal = 1;
+
+  let html = '';
+  steps.forEach((step, i) => {
+    const val = step.value.toLocaleString('ru-RU');
+    // Расчет ширины относительно максимального значения (минимум 35% для отображения текста)
+    let w = Math.max(35, (step.value / maxVal) * 100);
+    
+    html += `<div class="funnel-stage fade-in" style="animation-delay:${i * 0.06}s">
+      <div class="funnel-bar fb-${step.idx}" style="width:${w}%"><span class="fv">${val}</span><span class="fl">${step.label}</span></div>
+    </div>`;
+    
+    if (i < steps.length - 1) {
+      const rate = step.value > 0 ? ((steps[i + 1].value / step.value) * 100).toFixed(1) : '—';
+      html += `<div class="funnel-gap fade-in" style="animation-delay:${i * 0.06 + 0.03}s">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        <span class="fg-badge">${rate}%</span>
+      </div>`;
+    }
+  });
+
+  // Отдельный блок для выручки (вне воронки)
+  html += `
+  <div class="funnel-revenue fade-in" style="animation-delay:${steps.length * 0.06}s">
+    <div class="funnel-revenue-inner">
+      <span class="rev-label">Выручка</span>
+      <span class="rev-val">${formatMoney(totals.revenue)}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('funnelChart').innerHTML = html;
+}
+
+function renderTable(results) {
+  const tbody = document.getElementById('tableBody');
+  if (results.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="state-message">Нет данных за выбранный период</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = results.map((r, i) => {
+    const rc = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+    return `<tr class="fade-in" style="animation-delay:${i * 0.02}s">
+      <td class="rank ${rc}">${i + 1}</td>
+      <td class="name-cell">${escHtml(r.name)}</td>
+      <td class="num highlight-blue">${r.leads.toLocaleString('ru-RU')}</td>
+      <td class="num">${r.deals.toLocaleString('ru-RU')}</td>
+      <td class="num highlight-green">${r.wonCount.toLocaleString('ru-RU')}</td>
+      <td class="num">${r.conversion.toFixed(1)}%</td>
+      <td class="num highlight-amber">${formatMoney(r.revenue)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SORTING
+// ═══════════════════════════════════════════════════════════
+function setupSorting() {
+  document.querySelectorAll('thead th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      if (currentSort.key === key) {
+        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        currentSort.key = key;
+        currentSort.dir = key === 'name' ? 'asc' : 'desc';
+      }
+      sortResults();
+      renderTable(lastResults);
+      document.querySelectorAll('thead th').forEach(t => {
+        t.classList.remove('sorted');
+        t.textContent = t.textContent.replace(/ [▲▼]/g, '');
+      });
+      th.classList.add('sorted');
+      th.textContent += currentSort.dir === 'desc' ? ' ▼' : ' ▲';
+    });
+  });
+}
+
+function sortResults() {
+  const { key, dir } = currentSort;
+  lastResults.sort((a, b) => {
+    let va = a[key], vb = b[key];
+    if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb, 'ru') : vb.localeCompare(va, 'ru');
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function formatMoney(amount) {
+  if (amount >= 1_000_000) return (amount / 1_000_000).toFixed(2).replace('.', ',') + ' млн ₽';
+  return amount.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ₽';
+}
+
+function animateNumber(id, target) {
+  const el = document.getElementById(id);
+  if (target === 0) { el.textContent = '0'; return; }
+  const dur = 500, t0 = performance.now();
+  const tick = (now) => {
+    const p = Math.min((now - t0) / dur, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('ru-RU');
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ═══════════════════════════════════════════════════════════
+// COMBO BOX (Searchable Select)
+// ═══════════════════════════════════════════════════════════
+function initComboBox(comboId, options, selectedValue) {
+  const box = document.getElementById(comboId);
+  const input = box.querySelector('.combo-input');
+  const dropdown = box.querySelector('.combo-dropdown');
+
+  box._options = options;
+  box._selected = new Set([String(selectedValue)]);
+  box._highlighted = -1;
+
+  function updateInput() {
+    if (box._selected.has('all')) {
+      const allOpt = options.find(o => String(o.value) === 'all');
+      input.value = allOpt ? allOpt.label : 'Все';
+      input._displayLabel = input.value;
+      box.dataset.value = 'all';
+    } else if (box._selected.size === 0) {
+      input.value = 'Нет выбранных';
+      input._displayLabel = input.value;
+      box.dataset.value = 'none';
+    } else {
+      const sels = options.filter(o => box._selected.has(String(o.value)) && String(o.value) !== 'all');
+      const text = sels.map(s => s.label).join(', ');
+      input.value = text;
+      input._displayLabel = text;
+      box.dataset.value = Array.from(box._selected).join(',');
+    }
+  }
+
+  updateInput();
+
+  function renderDropdown(filter = '') {
+    const q = filter.toLowerCase();
+    const filtered = q
+      ? box._options.filter(o => o.label.toLowerCase().includes(q))
+      : box._options;
+
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="combo-empty">Ничего не найдено</div>';
+      return;
+    }
+
+    dropdown.innerHTML = filtered.map((o, i) => {
+      const v = String(o.value);
+      const isSel = box._selected.has('all') || box._selected.has(v);
+      const chk = `<input type="checkbox" ${isSel ? 'checked' : ''} style="margin-right:8px; pointer-events:none; accent-color: var(--accent);">`;
+      return `<div class="combo-option ${isSel ? 'selected' : ''}" data-value="${escHtml(v)}" data-idx="${i}" title="${escHtml(o.label)}">${chk}${highlightMatch(o.label, q)}</div>`;
+    }).join('');
+
+    box._highlighted = -1;
+  }
+
+  function highlightMatch(text, q) {
+    if (!q) return escHtml(text);
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx === -1) return escHtml(text);
+    return escHtml(text.slice(0, idx)) +
+      '<b style="color:var(--accent)">' + escHtml(text.slice(idx, idx + q.length)) + '</b>' +
+      escHtml(text.slice(idx + q.length));
+  }
+
+  function openDropdown() {
+    box.classList.add('open');
+    renderDropdown(input.value === input._displayLabel ? '' : input.value);
+  }
+
+  function closeDropdown() {
+    box.classList.remove('open');
+    input.value = input._displayLabel;
+  }
+
+  function toggleOption(val) {
+    if (val === 'all') {
+      if (box._selected.has('all')) {
+        box._selected.clear();
+      } else {
+        box._selected.clear();
+        box._selected.add('all');
+      }
+    } else {
+      if (box._selected.has('all')) {
+        box._selected.delete('all');
+        options.forEach(o => {
+          if (String(o.value) !== 'all' && String(o.value) !== val) {
+            box._selected.add(String(o.value));
+          }
+        });
+      } else {
+        if (box._selected.has(val)) {
+          box._selected.delete(val);
+        } else {
+          box._selected.add(val);
+        }
+      }
+    }
+    
+    if (box._selected.size === options.length - 1) { // minus 'all' option
+      box._selected.clear();
+      box._selected.add('all');
+    }
+
+    updateInput();
+    renderDropdown(input.value === input._displayLabel ? '' : input.value);
+    input.focus();
+  }
+
+  // Event: Click on input/box → open and select text for typing
+  input.addEventListener('focus', () => {
+    if (!box.classList.contains('open')) {
+      openDropdown();
+      input.select();
+    }
+  });
+
+  box.addEventListener('click', (e) => {
+    if (e.target !== input && e.target.closest('.combo-dropdown') === null) {
+      if (box.classList.contains('open')) {
+        closeDropdown();
+      } else {
+        input.focus();
+        openDropdown();
+        input.select();
+      }
+    } else if (e.target === input) {
+      if (!box.classList.contains('open')) openDropdown();
+      input.select();
+    }
+  });
+
+  // Event: Typing → filter
+  input.addEventListener('input', () => {
+    if (!box.classList.contains('open')) box.classList.add('open');
+    renderDropdown(input.value);
+  });
+
+  // Event: Click on option
+  dropdown.addEventListener('click', (e) => {
+    const opt = e.target.closest('.combo-option');
+    if (!opt) return;
+    e.stopPropagation();
+    toggleOption(opt.dataset.value);
+  });
+
+  // Event: Keyboard
+  input.addEventListener('keydown', (e) => {
+    const items = dropdown.querySelectorAll('.combo-option');
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      box._highlighted = Math.min(box._highlighted + 1, items.length - 1);
+      updateHighlight(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      box._highlighted = Math.max(box._highlighted - 1, 0);
+      updateHighlight(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (box._highlighted >= 0 && items[box._highlighted]) {
+        const opt = items[box._highlighted];
+        toggleOption(opt.dataset.value);
+      }
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+      input.blur();
+    }
+  });
+
+  function updateHighlight(items) {
+    items.forEach((it, i) => it.classList.toggle('highlighted', i === box._highlighted));
+    if (items[box._highlighted]) {
+      items[box._highlighted].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!box.contains(e.target)) closeDropdown();
+  });
+}</script>
+</body>
+</html>
