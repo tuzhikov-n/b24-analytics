@@ -787,7 +787,7 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
 
   const allLeads = await bx24FetchAll('crm.lead.list', {
     filter: leadFilter,
-    select: ['ID', 'ASSIGNED_BY_ID', 'DATE_CREATE', 'DATE_CLOSED', 'STATUS_SEMANTIC_ID']
+    select: ['ID', 'ASSIGNED_BY_ID', 'DATE_CREATE', 'DATE_CLOSED', 'DATE_MODIFY', 'STATUS_SEMANTIC_ID']
   }, (loaded, total) => updateProgress(`Лиды: ${loaded}/${total}`));
 
   const cohortLeadIds = new Set(allLeads.map(l => String(l.ID)));
@@ -856,12 +856,16 @@ async function loadCohortData(targetUsers, dateFrom, dateTo, selCats, selUsers) 
       s.inProgressCount++;
     }
 
-    // Processing time: only for leads closed within period
-    if (closedInPeriod && l.DATE_CREATE) {
-      const created = new Date(l.DATE_CREATE);
-      const closed = new Date(l.DATE_CLOSED);
-      const hours = (closed - created) / (1000 * 60 * 60);
-      if (hours >= 0 && isFinite(hours)) s.processingTimes.push(hours);
+    // Processing time: for ANY lead with a final status (converted or spam)
+    // Uses DATE_CLOSED if available, falls back to DATE_MODIFY for converted leads
+    if (l.STATUS_SEMANTIC_ID === 'S' || l.STATUS_SEMANTIC_ID === 'F') {
+      const endDateStr = l.DATE_CLOSED || l.DATE_MODIFY;
+      if (endDateStr && l.DATE_CREATE) {
+        const created = new Date(l.DATE_CREATE);
+        const closed = new Date(endDateStr);
+        const hours = (closed - created) / (1000 * 60 * 60);
+        if (hours >= 0 && isFinite(hours)) s.processingTimes.push(hours);
+      }
     }
   });
 
@@ -1047,7 +1051,10 @@ function formatMoney(amount) {
 }
 
 function formatDuration(hours) {
-  if (hours < 1) return Math.round(hours * 60) + 'м';
+  if (hours < 1) {
+    const mins = Math.round(hours * 60);
+    return mins > 0 ? mins + 'м' : '< 1м';
+  }
   if (hours < 24) {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
