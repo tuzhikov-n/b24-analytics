@@ -363,10 +363,24 @@
       .settings-bar input[type="text"] { min-width: unset; }
       .metrics-bar { flex-direction: column; }
     }
+
+    /* ─── Connection Error Banner ─── */
+    .connection-error {
+      display: none; padding: 14px 20px; margin-bottom: 16px;
+      background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
+      border-radius: var(--radius-sm); color: var(--red);
+      font-size: 13px; font-weight: 500; text-align: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .connection-error .retry-link {
+      color: var(--accent); cursor: pointer; text-decoration: underline;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="app">
+    <div id="connectionError" class="connection-error"></div>
     <div class="header">
       <h1>Сквозная аналитика</h1>
       <p>Битрикс24 CRM — когортный анализ лидов в разрезе ответственных</p>
@@ -698,6 +712,12 @@ async function initConnection() {
   } catch (err) {
     status.innerHTML = `<span class="status-badge disconnected"><span class="dot"></span>Ошибка: ${err.message}</span>`;
     btn.textContent = 'Подключить';
+    // Show visible error banner
+    const errBanner = document.getElementById('connectionError');
+    errBanner.style.display = '';
+    errBanner.innerHTML = `⚠️ Не удалось подключиться к Битрикс24: ${err.message}. <span class="retry-link" onclick="initConnection()">Повторить</span>`;
+    // Still show filters panel so user can retry after connection restores
+    document.getElementById('filtersPanel').style.display = '';
   }
   btn.disabled = false;
 }
